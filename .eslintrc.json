@@ -1,7 +1,8 @@
 {
   "env": {
     "browser": true,
-    "es2021": true
+    "es2021": true,
+    "node": true
   },
   "extends": [
     "eslint:recommended",
@@ -19,7 +20,9 @@
     "no-unused-expressions": "error",
     "prefer-const": "error",
     "no-console": "warn",
-    "no-undef": "error"
+    "no-undef": "error",
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "@typescript-eslint/no-explicit-any": "warn"
   },
   "globals": {
     "process": "readonly"
