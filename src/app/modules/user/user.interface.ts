@@ -2,10 +2,7 @@
 import { Model } from 'mongoose';
 export enum UserRole {
   super_admin = 'super_admin',
-  sub_admin = 'sub_admin',
-  provider = 'provider',
-  customer = 'customer',
-  employee = 'employee',
+  user = 'user',
 }
 export enum status {
   pending = 'pending',
@@ -22,6 +19,7 @@ export interface TUser {
   id?: string;
   email?: string;
   password: string;
+  name: string;
   phoneNumber: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;

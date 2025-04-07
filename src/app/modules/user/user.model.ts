@@ -27,22 +27,27 @@ const UserSchema = new Schema<TUser, UserModel>(
     email: {
       type: String,
       unique: true,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
     },
     password: {
       type: String,
-      // required: true,
+      required: true,
       default: '',
     },
     countryCode: {
       type: String,
-      // required: true,
+      required: true,
       default: '',
     },
 
     phoneNumber: {
       type: String,
-      // required: true,
-      // unique: true,
+      required: true,
+      unique: true,
       default: '',
     },
     needsPasswordChange: {
@@ -54,7 +59,7 @@ const UserSchema = new Schema<TUser, UserModel>(
     },
     accountType: {
       type: String,
-      enum: ['custom', 'google'],
+      enum: ['custom', 'google', 'facebook'],
       default: 'custom',
     },
     role: {
