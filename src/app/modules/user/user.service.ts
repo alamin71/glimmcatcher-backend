@@ -76,7 +76,6 @@ const deleteAccount = async (id: string, password: string) => {
 
 const updatePhoneNumber = async (id: string, payload: any) => {
   const result = await User.findByIdAndUpdate(id, payload);
-
   return result;
 };
 

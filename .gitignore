@@ -3,3 +3,4 @@ dist
 .env
 firebase.json
 .env.production
+glimcathers_accessKeys.csv
