@@ -2,9 +2,9 @@ import { Router } from 'express';
 import auth from '../../middleware/auth';
 import upload from '../../middleware/fileUpload';
 import parseData from '../../middleware/parseData';
+import validateRequest from '../../middleware/validateRequest';
 import { USER_ROLE } from './user.constant';
 import { userControllers } from './user.controller';
-import validateRequest from '../../middleware/validateRequest';
 import userValidation from './user.validation';
 
 const router = Router();
@@ -26,7 +26,11 @@ router.patch(
 
   userControllers.updatePhoneNumber,
 );
-router.get('/profile', auth(USER_ROLE.sup_admin), userControllers.getme);
+router.get(
+  '/profile',
+  auth(USER_ROLE.sup_admin, USER_ROLE.user),
+  userControllers.getme,
+);
 
 router.get(
   '/:id',

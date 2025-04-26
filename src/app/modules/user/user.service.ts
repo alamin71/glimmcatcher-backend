@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
-import mongoose from 'mongoose';
 import AppError from '../../error/AppError';
 
-import config from '../../config';
-import { createToken } from '../auth/auth.utils';
-
-import { TUser, UserRole } from './user.interface';
+import { TUser } from './user.interface';
 import User from './user.model';
 // customer
 
@@ -22,7 +18,17 @@ const signupuser = async (payload: TUser) => {
   return result;
 };
 
-const getme = async (id: string) => {};
+const getme = async (id: string) => {
+  const result = await User.findById(id);
+  const data = {
+    email: result?.email,
+    fullName: result?.fullName,
+    countryCode: result?.countryCode,
+    phoneNumber: result?.phoneNumber,
+    image: result?.image ?? {},
+  };
+  return data;
+};
 
 const updateProfile = async (id: string, payload: Partial<TUser>) => {
   const user = await User.findById(id);
@@ -49,9 +55,7 @@ const getSingleUser = async (id: string) => {
   return result;
 };
 const deleteAccount = async (id: string, password: string) => {
-  console.log(id);
   const user = await User.IsUserExistbyId(id);
-  console.log(user);
   const isPasswordMatched = await bcrypt.compare(password, user?.password);
   if (!isPasswordMatched) {
     throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Password does not match!');
@@ -72,6 +76,7 @@ const deleteAccount = async (id: string, password: string) => {
 
 const updatePhoneNumber = async (id: string, payload: any) => {
   const result = await User.findByIdAndUpdate(id, payload);
+
   return result;
 };
 

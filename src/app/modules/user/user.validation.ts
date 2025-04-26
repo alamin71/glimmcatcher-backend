@@ -1,17 +1,7 @@
 import { z } from 'zod';
-import { UserRole } from './user.interface';
-
-// Image schema (optional)
-
-// Verification schema (required)
-const verificationSchema = z.object({
-  otp: z.number(),
-  expiresAt: z.coerce.date(),
-  status: z.boolean(),
-});
 
 // Main user schema
-export const createUserZodSchema = z.object({
+const createUserZodSchema = z.object({
   body: z.object({
     email: z.string().email(),
     image: z

@@ -7,7 +7,11 @@ import { authValidation } from './auth.validation';
 
 const router = Router();
 
-router.post('/login', authControllers.login);
+router.post(
+  '/login',
+  validateRequest(authValidation.loginZodSchema),
+  authControllers.login,
+);
 router.post(
   '/refresh-token',
   validateRequest(authValidation.refreshTokenValidationSchema),
@@ -15,7 +19,7 @@ router.post(
 );
 router.patch(
   '/change-password',
-  auth(USER_ROLE.sup_admin, USER_ROLE.provider, USER_ROLE.customer),
+  auth(USER_ROLE.sup_admin, USER_ROLE.user),
   authControllers.changePassword,
 );
 router.patch('/forgot-password', authControllers.forgotPassword);

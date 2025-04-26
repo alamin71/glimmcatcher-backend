@@ -13,12 +13,7 @@ import { TchangePassword, Tlogin, TresetPassword } from './auth.interface';
 import { createToken, verifyToken } from './auth.utils';
 
 const login = async (payload: Tlogin) => {
-  const user = await User.isUserExistByNumber(
-    payload?.countryCode as string,
-    payload?.phoneNumber as string,
-  );
-  let shop;
-  let profile;
+  const user = await User.isUserExist(payload?.email as string);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User Not Found');
   }
@@ -80,7 +75,6 @@ const login = async (payload: Tlogin) => {
     config.jwt_refresh_expires_in as string,
   );
   return {
-    user,
     accessToken,
     refreshToken,
   };
