@@ -8,12 +8,6 @@ import config from '../../config';
 import AppError from '../../error/AppError';
 import { sendEmail } from '../../utils/mailSender';
 import { generateOtp } from '../../utils/otpGenerator';
-
-import Customer from '../customer/customer.model';
-import Employee from '../employee/employee.model';
-import { Provider } from '../provider/provider.model';
-import { Shop } from '../shop/shop.model';
-import { UserRole } from '../user/user.interface';
 import User from '../user/user.model';
 import { TchangePassword, Tlogin, TresetPassword } from './auth.interface';
 import { createToken, verifyToken } from './auth.utils';
@@ -38,43 +32,41 @@ const login = async (payload: Tlogin) => {
     throw new AppError(httpStatus.BAD_REQUEST, 'user is not verified !');
   }
 
-  switch (user?.role) {
-    case UserRole.customer:
-      profile = await Customer.findOne({ user: user?._id });
-      await Customer.updateOne(
-        { _id: profile?._id },
-        { fcmToken: payload?.fcmToken },
-      );
-      break;
-    case 'provider':
-      profile = await Provider.findOne({ user: user?._id });
-      shop = await Shop.findOne({ provider: profile?._id }).select('_id');
-      await Provider.updateOne(
-        { _id: profile?._id },
-        { fcmToken: payload?.fcmToken },
-      );
-      break;
-    case 'employee':
-      profile = await Employee.findOne({ user: user?._id });
-      shop = { _id: profile?.shop };
-      await Employee.updateOne(
-        { _id: profile?._id },
-        { fcmToken: payload?.fcmToken },
-      );
-      break;
+  // switch (user?.role) {
+  //   case UserRole.customer:
+  //     profile = await Customer.findOne({ user: user?._id });
+  //     await Customer.updateOne(
+  //       { _id: profile?._id },
+  //       { fcmToken: payload?.fcmToken },
+  //     );
+  //     break;
+  //   case 'provider':
+  //     profile = await Provider.findOne({ user: user?._id });
+  //     shop = await Shop.findOne({ provider: profile?._id }).select('_id');
+  //     await Provider.updateOne(
+  //       { _id: profile?._id },
+  //       { fcmToken: payload?.fcmToken },
+  //     );
+  //     break;
+  //   case 'employee':
+  //     profile = await Employee.findOne({ user: user?._id });
+  //     shop = { _id: profile?.shop };
+  //     await Employee.updateOne(
+  //       { _id: profile?._id },
+  //       { fcmToken: payload?.fcmToken },
+  //     );
+  //     break;
 
-    default:
-      break;
-  }
+  //   default:
+  //     break;
+  // }
   if (!(await User.isPasswordMatched(payload.password, user.password))) {
     throw new AppError(httpStatus.BAD_REQUEST, 'password do not match');
   }
 
   const jwtPayload = {
     userId: user?._id,
-    profileId: profile?._id,
     role: user.role,
-    shop: shop?._id,
   };
   const accessToken = createToken(
     jwtPayload,

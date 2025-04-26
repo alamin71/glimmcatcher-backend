@@ -2,6 +2,7 @@
 import { Model } from 'mongoose';
 export enum UserRole {
   super_admin = 'super_admin',
+  admin = 'admin',
   user = 'user',
 }
 export enum status {
@@ -14,6 +15,10 @@ interface Verification {
   expiresAt: Date;
   status: boolean;
 }
+interface image {
+  id: string | number;
+  url: string;
+}
 export interface TUser {
   [x: string]: any;
   id?: string;
@@ -21,6 +26,7 @@ export interface TUser {
   password: string;
   name: string;
   phoneNumber: string;
+  image: image;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;
   role: UserRole;

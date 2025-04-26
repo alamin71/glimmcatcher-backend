@@ -20,7 +20,16 @@ const VerificationSchema = new Schema({
     required: true,
   },
 });
-
+const imageSchema = new Schema({
+  id: {
+    type: Number, // Allows string or number
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+  },
+});
 // Define the schema for the User model
 const UserSchema = new Schema<TUser, UserModel>(
   {
@@ -29,7 +38,8 @@ const UserSchema = new Schema<TUser, UserModel>(
       unique: true,
       required: true,
     },
-    name: {
+    image: imageSchema,
+    fullName: {
       type: String,
       required: true,
     },
@@ -73,7 +83,7 @@ const UserSchema = new Schema<TUser, UserModel>(
     },
     isVerified: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     isDeleted: {
       type: Boolean,
@@ -81,7 +91,7 @@ const UserSchema = new Schema<TUser, UserModel>(
     },
     verification: {
       type: VerificationSchema,
-      required: true,
+      required: false,
     },
   },
   {

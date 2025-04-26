@@ -4,102 +4,42 @@ import upload from '../../middleware/fileUpload';
 import parseData from '../../middleware/parseData';
 import { USER_ROLE } from './user.constant';
 import { userControllers } from './user.controller';
+import validateRequest from '../../middleware/validateRequest';
+import userValidation from './user.validation';
 
 const router = Router();
+
 router.post(
-  '/create-customers',
-  upload.single('file'),
-  parseData(),
-  userControllers.insertCustomerIntoDb,
-);
-router.post(
-  '/google/create-customers',
-  // upload.single('file'),
-  // parseData(),
-  userControllers.SignupWithGoogleForCustomer,
-);
-router.post(
-  '/create-provider',
-  upload.single('file'),
-  parseData(),
-  auth(USER_ROLE.sup_admin),
-  userControllers.insertProviderintoDb,
-);
-router.post(
-  '/create-employee',
-  upload.single('file'),
-  parseData(),
-  auth(USER_ROLE.provider),
-  // validateRequest(employeeValidation.insertEmployeeSchema),
-  userControllers.insertEmployeeIntoDb,
+  '/',
+  validateRequest(userValidation.createUserZodSchema),
+  userControllers.signupuser,
 );
 router.patch(
   '/',
-  auth(USER_ROLE.provider, USER_ROLE.customer, USER_ROLE.employee),
+  auth(USER_ROLE.user, USER_ROLE.sup_admin),
   upload.single('file'),
   userControllers.updateProfile,
 );
-router.patch(
-  '/update/:id',
-  auth(USER_ROLE.provider, USER_ROLE.customer, USER_ROLE.employee),
-  upload.single('file'),
-  parseData(),
-  userControllers.updateUser,
-);
+
 router.patch(
   '/phone/update',
-  auth(USER_ROLE.provider, USER_ROLE.customer, USER_ROLE.employee),
 
   userControllers.updatePhoneNumber,
 );
-router.get(
-  '/profile',
-  auth(
-    USER_ROLE.sup_admin,
-    USER_ROLE.customer,
-    USER_ROLE.provider,
-    USER_ROLE.employee,
-  ),
-  userControllers.getme,
-);
-
-router.get(
-  '/all',
-  auth(USER_ROLE.vendor, USER_ROLE.admin),
-  userControllers.getAllUsers,
-);
+router.get('/profile', auth(USER_ROLE.sup_admin), userControllers.getme);
 
 router.get(
   '/:id',
   auth(USER_ROLE.vendor, USER_ROLE.admin),
   userControllers.getsingleUser,
 );
-router.patch(
-  '/update/:id',
-  auth(USER_ROLE.admin),
-  parseData(),
-  userControllers.updateUser,
-);
+
 router.patch(
   '/:id',
   auth(USER_ROLE.user),
   parseData(),
-  auth(
-    USER_ROLE.sup_admin,
-    USER_ROLE.customer,
-    USER_ROLE.provider,
-    USER_ROLE.employee,
-  ),
+  auth(USER_ROLE.sup_admin),
   userControllers.updateProfile,
 );
-router.delete(
-  '/',
-  auth(
-    USER_ROLE.sup_admin,
-    USER_ROLE.customer,
-    USER_ROLE.provider,
-    USER_ROLE.employee,
-  ),
-  userControllers.deleteAccount,
-);
+router.delete('/', auth(USER_ROLE.sup_admin), userControllers.deleteAccount);
 export const userRoutes = router;

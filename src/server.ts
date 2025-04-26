@@ -2,9 +2,9 @@ import { Server, createServer } from 'http';
 import mongoose from 'mongoose';
 import app from './app';
 import config from './app/config';
-import initializeSocketIO from './socketIo';
+// import initializeSocketIO from './socketIo';
 let server: Server;
-export const io = initializeSocketIO(createServer(app));
+// export const io = initializeSocketIO(createServer(app));
 
 async function main() {
   try {
@@ -13,7 +13,7 @@ async function main() {
     server = app.listen(Number(config.port), config.ip as string, () => {
       console.log(`app is listening on port ${config.port}`);
     });
-    io.listen(Number(config.socket_port));
+    // io.listen(Number(config.socket_port));
     console.log(`Socket is listening on port ${config.socket_port}`);
   } catch (err) {
     console.log(err);
