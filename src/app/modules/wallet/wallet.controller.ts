@@ -5,7 +5,12 @@ import sendResponse from '../../utils/sendResponse';
 import walletService from './wallet.service';
 
 const insertTextToWallet = catchAsync(async (req: Request, res: Response) => {
-  const result = await walletService.insertTextToWallet(req.body);
+  const { userId } = req.user;
+  const result = await walletService.insertTextToWallet({
+    note: { ...req.body },
+    user: userId,
+    type: 'text',
+  });
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -18,9 +23,17 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
   if (req?.file) {
     voice = await uploadToS3(req?.file, 'voice/');
   }
+  const data = {
+    title: req.body.title,
+    voiceLink: voice,
+  };
+
+  const { userId } = req.user;
   const result = await walletService.insertAudioToWallet({
     ...req.body,
-    voice,
+    user: userId,
+    type: 'voice',
+    voice: data,
   });
   sendResponse(res, {
     statusCode: 200,
@@ -35,8 +48,11 @@ const insertAiImageToWallet = catchAsync(
     if (req?.file) {
       image = await uploadToS3(req?.file, 'wallet/aiImage/');
     }
+    const { userId } = req.user;
     const result = await walletService.insertAiImageToWallet({
       ...req.body,
+      user: userId,
+      type: 'ai_generate',
       aiGenerate: image,
     });
     sendResponse(res, {
@@ -84,17 +100,33 @@ const insertVideosOrImagesToWallet = catchAsync(
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: 'A successfully',
+      message: 'Data inserted successfully',
       data: result,
     });
   },
 );
+const getMyWalletData = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user;
+
+  const result = await walletService.getMyWalletData({
+    ...req.query,
+    user: userId,
+  });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Wallet data retrieved successfully',
+    data: result.data,
+    meta: result?.meta,
+  });
+});
 
 const walletController = {
   insertTextToWallet,
   insertAudioToWallet,
   insertAiImageToWallet,
   insertVideosOrImagesToWallet,
+  getMyWalletData,
 };
 
 export default walletController;

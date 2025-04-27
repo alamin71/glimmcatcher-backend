@@ -3,6 +3,10 @@ import { Types } from 'mongoose';
 export type WalletType = 'text' | 'voice' | 'image_video' | 'ai_generate';
 
 export interface IImageOrVideo {
+  id: string | number;
+  url: string;
+}
+export interface voiceLink {
   id: number;
   url: string;
 }
@@ -14,17 +18,14 @@ export interface IText {
 
 export interface IVoice {
   title?: string;
-  voiceLink?: string;
+  voiceLink?: voiceLink;
 }
 
 export interface IImageVideo {
   title?: string;
   description?: string;
-  imagesOrVideos?: IImageOrVideo[];
-}
-
-export interface IAiGenerate {
-  image?: IImageOrVideo;
+  images?: IImageOrVideo[];
+  videos?: IImageOrVideo[];
 }
 
 export interface IWallet {
@@ -34,7 +35,7 @@ export interface IWallet {
   text?: IText;
   voice?: IVoice;
   imageVideo?: IImageVideo;
-  aiGenerate?: IAiGenerate;
+  aiGenerate?: IImageOrVideo;
   isDeleted?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

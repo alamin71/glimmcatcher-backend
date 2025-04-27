@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request } from 'express';
 import multer, { memoryStorage } from 'multer';
 
@@ -6,31 +5,43 @@ const fileUpload = () => {
   const upload = multer({
     storage: memoryStorage(),
     limits: {
-      fileSize: 20000000, // Limit file size to 2MB
+      fileSize: 20000000, // Limit file size to 20MB
     },
-
     fileFilter: function (req: Request, file, cb) {
-      // Check if the file type is allowed
-      if (
-        file.mimetype === 'image/png' ||
-        file.mimetype === 'image/jpg' ||
-        file.mimetype === 'image/jpeg' ||
-        file.mimetype === 'image/svg' ||
-        file.mimetype === 'image/svg+xml'
-      ) {
-        cb(null, true); // No error, accept file
+      const allowedTypes = [
+        // Image types
+        'image/png',
+        'image/jpg',
+        'image/jpeg',
+        'image/svg+xml',
+        // Video types
+        'video/mp4',
+        'video/mpeg',
+        'video/ogg',
+        'video/webm',
+        'video/quicktime',
+        'video/x-msvideo',
+        // Audio types
+        'audio/mpeg',
+        'audio/mp3',
+        'audio/wav',
+        'audio/ogg',
+        'audio/x-wav',
+        'audio/webm',
+      ];
+
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true); // File is allowed
       } else {
-        // Create an instance of Error and pass it
         const error: any = new Error(
-          'Only png, jpg, jpeg, and svg formats are allowed',
+          'Only image, video, or audio files are allowed',
         );
-        cb(error, false); // Pass the error object and reject the file
+        cb(error, false); // Reject the file
       }
     },
   });
 
   return upload;
 };
-
 const upload = fileUpload();
 export default upload;

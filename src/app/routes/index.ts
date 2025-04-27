@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authRoutes } from '../modules/auth/auth.route';
 import { otpRoutes } from '../modules/otp/otp.routes';
 import { userRoutes } from '../modules/user/user.route';
+import walletRoutes from '../modules/wallet/wallet.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -17,6 +18,10 @@ const moduleRoutes = [
   {
     path: '/otp',
     route: otpRoutes,
+  },
+  {
+    path: '/wallet',
+    route: walletRoutes,
   },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

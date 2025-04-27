@@ -1,6 +1,6 @@
 import { model, Model, Schema } from 'mongoose';
 import {
-  IAiGenerate,
+  IImageOrVideo,
   IImageVideo,
   IText,
   IVoice,
@@ -15,7 +15,7 @@ const textSchema = new Schema<IText>({
 
 const voiceSchema = new Schema<IVoice>({
   title: { type: String },
-  voiceLink: { type: String },
+  voiceLink: { id: { type: String }, url: { type: String } },
 });
 
 const imageVideoSchema = new Schema<IImageVideo>({
@@ -35,11 +35,9 @@ const imageVideoSchema = new Schema<IImageVideo>({
   ],
 });
 
-const aiGenerateSchema = new Schema<IAiGenerate>({
-  image: {
-    id: { type: Number },
-    url: { type: String },
-  },
+const aiGenerateSchema = new Schema<IImageOrVideo>({
+  id: { type: String },
+  url: { type: String },
 });
 
 // Main Wallet Schema

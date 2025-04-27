@@ -1,4 +1,3 @@
-import QueryBuilder from '../../builder/QueryBuilder';
 import { TContent } from './content.interface';
 import { Content } from './content.model';
 

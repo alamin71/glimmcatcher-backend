@@ -1,3 +1,4 @@
+import QueryBuilder from '../../builder/QueryBuilder';
 import Wallet from './wallet.model';
 
 const insertTextToWallet = async (payload: any) => {
@@ -17,10 +18,26 @@ const insertVideosOrImagesToWallet = async (payload: any) => {
   return result;
 };
 
+const getMyWalletData = async (query: Record<string, any>) => {
+  const walletModel = new QueryBuilder(Wallet.find(), query)
+    .search([])
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+  const data = await walletModel.modelQuery;
+  const meta = await walletModel.countTotal();
+  return {
+    data,
+    meta,
+  };
+};
+
 const walletService = {
   insertTextToWallet,
   insertAudioToWallet,
   insertAiImageToWallet,
   insertVideosOrImagesToWallet,
+  getMyWalletData,
 };
 export default walletService;
