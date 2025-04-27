@@ -21,9 +21,15 @@ const voiceSchema = new Schema<IVoice>({
 const imageVideoSchema = new Schema<IImageVideo>({
   title: { type: String },
   description: { type: String },
-  imagesOrVideos: [
+  images: [
     {
-      id: { type: Number },
+      id: { type: String },
+      url: { type: String },
+    },
+  ],
+  videos: [
+    {
+      id: { type: String },
       url: { type: String },
     },
   ],
