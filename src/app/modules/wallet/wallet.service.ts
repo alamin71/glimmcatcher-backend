@@ -33,11 +33,19 @@ const getMyWalletData = async (query: Record<string, any>) => {
   };
 };
 
+const deleteWalletData = async (id: string) => {
+  const result = await Wallet.findByIdAndUpdate({
+    isDeleted: true,
+  });
+  return result;
+};
+
 const walletService = {
   insertTextToWallet,
   insertAudioToWallet,
   insertAiImageToWallet,
   insertVideosOrImagesToWallet,
   getMyWalletData,
+  deleteWalletData,
 };
 export default walletService;

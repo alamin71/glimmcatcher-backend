@@ -31,6 +31,7 @@ router.post(
   auth(USER_ROLE.user),
   walletController.insertVideosOrImagesToWallet,
 );
+router.delete('/:id', auth(USER_ROLE.user), walletController.deleteWalletData);
 
 const walletRoutes = router;
 

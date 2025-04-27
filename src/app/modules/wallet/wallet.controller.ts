@@ -120,6 +120,15 @@ const getMyWalletData = catchAsync(async (req: Request, res: Response) => {
     meta: result?.meta,
   });
 });
+const deleteWalletData = catchAsync(async (req: Request, res: Response) => {
+  const result = await walletService.deleteWalletData(req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Wallet data deleted successfully',
+    data: result,
+  });
+});
 
 const walletController = {
   insertTextToWallet,
@@ -127,6 +136,7 @@ const walletController = {
   insertAiImageToWallet,
   insertVideosOrImagesToWallet,
   getMyWalletData,
+  deleteWalletData,
 };
 
 export default walletController;
