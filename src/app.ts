@@ -1,13 +1,14 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
+import helmet from 'helmet';
 import globalErrorHandler from './app/middleware/globalErrorhandler';
 import notFound from './app/middleware/notfound';
 import router from './app/routes';
 
 const app: Application = express();
 app.use(express.static('public'));
-
+app.use(helmet());
 //parsers
 app.use(express.json());
 app.use(cookieParser());
