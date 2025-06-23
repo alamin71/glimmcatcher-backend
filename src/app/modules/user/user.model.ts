@@ -47,6 +47,7 @@ const UserSchema = new Schema<TUser, UserModel>(
       type: String,
       required: true,
       default: '',
+      select: false,
     },
     countryCode: {
       type: String,
@@ -119,7 +120,7 @@ UserSchema.post('save', function (doc, next) {
 UserSchema.statics.isUserExist = async function (
   email: string,
 ): Promise<TUser | null> {
-  return this.findOne({ email });
+  return this.findOne({ email }).select('+password').lean();
 };
 
 // Check if a user exists by phone number

@@ -15,7 +15,15 @@ const loginZodSchema = z.object({
       .min(6, { message: 'Password must be at least 6 characters' }),
   }),
 });
+const deleteAccountZodSchema = z.object({
+  body: z.object({
+    password: z.string({
+      required_error: 'Password is required',
+    }),
+  }),
+});
 export const authValidation = {
   refreshTokenValidationSchema,
   loginZodSchema,
+  deleteAccountZodSchema,
 };

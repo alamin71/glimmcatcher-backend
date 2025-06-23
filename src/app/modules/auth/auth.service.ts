@@ -55,6 +55,8 @@ const login = async (payload: Tlogin) => {
   //   default:
   //     break;
   // }
+  console.log('Plain password:', payload.password);
+  console.log('Hashed password:', user.password);
   if (!(await User.isPasswordMatched(payload.password, user.password))) {
     throw new AppError(httpStatus.BAD_REQUEST, 'password do not match');
   }
@@ -80,25 +82,68 @@ const login = async (payload: Tlogin) => {
   };
 };
 // change password
+// const changePassword = async (id: string, payload: TchangePassword) => {
+//   const user = await User.IsUserExistbyId(id).select('+password');
+//   if (!user) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+//   }
+
+//   if (!(await User.isPasswordMatched(payload?.oldPassword, user.password))) {
+//     throw new AppError(httpStatus.FORBIDDEN, 'old password do not match!');
+//   }
+//   if (payload?.newPassword !== payload?.confirmPassword) {
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'old password and new password do not match',
+//     );
+//   }
+//   const hashedPassword = await bcrypt.hash(
+//     payload?.newPassword,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+//   const result = await User.findByIdAndUpdate(
+//     id,
+//     {
+//       $set: {
+//         password: hashedPassword,
+//         passwordChangedAt: new Date(),
+//       },
+//     },
+//     { new: true },
+//   );
+//   return result;
+// };
 const changePassword = async (id: string, payload: TchangePassword) => {
-  const user = await User.IsUserExistbyId(id);
+  // Password সহ user খুঁজে আনা
+  const user = await User.findById(id).select('+password');
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  if (!(await User.isPasswordMatched(payload?.oldPassword, user.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, 'old password do not match!');
+  // পুরানো পাসওয়ার্ড মিলে কিনা যাচাই
+  const isPasswordValid = await User.isPasswordMatched(
+    payload.oldPassword,
+    user.password,
+  );
+
+  if (!isPasswordValid) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Old password does not match!');
   }
-  if (payload?.newPassword !== payload?.confirmPassword) {
+
+  // নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলে কিনা যাচাই
+  if (payload.newPassword !== payload.confirmPassword) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      'old password and new password do not match',
+      'New password and confirm password do not match!',
     );
   }
+
+  // নতুন পাসওয়ার্ড হ্যাশ করে update করা
   const hashedPassword = await bcrypt.hash(
-    payload?.newPassword,
+    payload.newPassword,
     Number(config.bcrypt_salt_rounds),
   );
+
   const result = await User.findByIdAndUpdate(
     id,
     {
@@ -109,8 +154,10 @@ const changePassword = async (id: string, payload: TchangePassword) => {
     },
     { new: true },
   );
+
   return result;
 };
+
 // forgot password
 
 const forgotPassword = async (email: string) => {
@@ -130,11 +177,11 @@ const forgotPassword = async (email: string) => {
     id: user?._id,
   };
   const token = jwt.sign(jwtPayload, config.jwt_access_secret as Secret, {
-    expiresIn: '3m',
+    expiresIn: '5m',
   });
   const currentTime = new Date();
   const otp = generateOtp();
-  const expiresAt = moment(currentTime).add(2, 'minute');
+  const expiresAt = moment(currentTime).add(5, 'minute');
   await User.findByIdAndUpdate(user?._id, {
     verification: {
       otp,

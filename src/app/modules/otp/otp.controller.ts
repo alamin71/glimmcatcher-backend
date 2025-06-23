@@ -19,7 +19,7 @@ const resendOtp = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'otp sent successfully',
+    message: 'otp sent successfully please verify otp',
     data: result,
   });
 });

@@ -2,7 +2,8 @@ import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import config from '../../config';
-import { User } from '../user/user.model';
+// import { User } from '../user/user.model';
+import User from '../user/user.model';
 import { generateOtp } from '../../utils/otpGenerator';
 import moment from 'moment';
 import { sendEmail } from '../../utils/mailSender';
@@ -40,12 +41,14 @@ const verifyOtp = async (token: string, otp: string | number) => {
 
   const updateUser = await User.findByIdAndUpdate(
     user?._id,
+
     {
       $set: {
+        isVerified: true,
         status: user?.status === 'active' ? user?.status : 'active',
         verification: {
           otp: 0,
-          expiresAt: moment().add(2, 'minute'),
+          expiresAt: moment().add(5, 'minute'),
           status: true,
         },
       },
@@ -57,7 +60,7 @@ const verifyOtp = async (token: string, otp: string | number) => {
     id: user?._id,
   };
   const jwtToken = jwt.sign(jwtPayload, config.jwt_access_secret as Secret, {
-    expiresIn: '2m',
+    expiresIn: '5m',
   });
   return { user: updateUser, token: jwtToken };
 };
@@ -94,7 +97,7 @@ const resendOtp = async (email: string) => {
     expiresIn: '2m',
   });
   await sendEmail(
-    user?.email,
+    user?.email!,
     'Your One Time Otp',
     `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <h2 style="color: #4CAF50;">Your One Time OTP</h2>

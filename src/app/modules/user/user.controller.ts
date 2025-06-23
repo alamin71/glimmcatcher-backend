@@ -16,7 +16,7 @@ const signupuser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Otp sent successfully',
+    message: 'Otp sent successfully Please verify otp',
     data: result,
   });
 });

@@ -6,11 +6,12 @@ import validateRequest from '../../middleware/validateRequest';
 import { USER_ROLE } from './user.constant';
 import { userControllers } from './user.controller';
 import userValidation from './user.validation';
+import { authValidation } from '../auth/auth.validation';
 
 const router = Router();
 
 router.post(
-  '/',
+  '/signup',
   validateRequest(userValidation.createUserZodSchema),
   userControllers.signupuser,
 );
@@ -45,5 +46,10 @@ router.patch(
   auth(USER_ROLE.sup_admin),
   userControllers.updateProfile,
 );
-router.delete('/', auth(USER_ROLE.sup_admin), userControllers.deleteAccount);
+router.delete(
+  '/',
+  auth(USER_ROLE.user, USER_ROLE.sup_admin),
+  validateRequest(authValidation.deleteAccountZodSchema),
+  userControllers.deleteAccount,
+);
 export const userRoutes = router;
