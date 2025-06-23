@@ -10,9 +10,14 @@ async function main() {
   try {
     await mongoose.connect(config.database_url as string);
 
-    server = app.listen(Number(config.port), config.ip as string, () => {
-      console.log(`app is listening on port ${config.port}`);
-    });
+    // server = app.listen(Number(config.port), config.ip as string, () => {
+    //   console.log(`app is listening on port ${config.port}`);
+    // });
+    const port = config.port || 5000;
+server = app.listen(port, () => {
+  console.log(`App is listening on port ${port}`);
+});
+
     // io.listen(Number(config.socket_port));
     console.log(`Socket is listening on port ${config.socket_port}`);
   } catch (err) {
