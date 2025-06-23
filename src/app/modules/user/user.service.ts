@@ -187,6 +187,10 @@ const getSingleUser = async (id: string) => {
   const result = await User.findById(id);
   return result;
 };
+const getAllUsers = async () => {
+  const users = await User.find(); 
+  return users;
+};
 
 const deleteAccount = async (id: string, password: string) => {
   const user = await User.findById(id).select('+password');
@@ -222,6 +226,7 @@ export const userServices = {
   getme,
   updateProfile,
   getSingleUser,
+  getAllUsers,
   deleteAccount,
   updatePhoneNumber,
   signupuser,

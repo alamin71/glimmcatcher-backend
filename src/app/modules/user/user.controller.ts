@@ -69,6 +69,16 @@ const getsingleUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.getAllUsers();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'All users retrieved successfully',
+    data: result,
+  });
+});
+
 
 const deleteAccount = catchAsync(async (req: Request, res: Response) => {
   console.log(req.body, 'DD');
@@ -89,6 +99,7 @@ export const userControllers = {
   signupuser,
   updateProfile,
   getsingleUser,
+  getAllUsers,
   deleteAccount,
   updatePhoneNumber,
 };
