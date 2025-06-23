@@ -15,7 +15,7 @@ async function main() {
     // });
     const port = config.port || 5000;
 server = app.listen(port, () => {
-  console.log(`App is listening on port ${port}`);
+  console.log(`App is listening on port ${config.port}`);
 });
 
     // io.listen(Number(config.socket_port));
