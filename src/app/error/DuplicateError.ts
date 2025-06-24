@@ -15,7 +15,7 @@ const handleDuplicateError = (err: any): TGenericErrorResponse => {
     },
   ];
 
-  const statusCode = 400;
+  const statusCode = 200;
 
   return {
     statusCode,
