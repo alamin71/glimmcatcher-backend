@@ -132,10 +132,16 @@ UserSchema.statics.isUserExistByNumber = async function (
 };
 
 // Check if a user exists by ID
+// UserSchema.statics.IsUserExistbyId = async function (
+//   id: string,
+// ): Promise<TUser | null> {
+//   return this.findById(id);
+// };
+
 UserSchema.statics.IsUserExistbyId = async function (
   id: string,
-): Promise<TUser | null> {
-  return this.findById(id);
+): Promise<Pick<TUser, '_id' | 'email' | 'role' | 'password'> | null> {
+  return this.findById(id).select('+password');
 };
 
 // Compare plain text password with hashed password
