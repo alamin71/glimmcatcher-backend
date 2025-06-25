@@ -120,7 +120,7 @@ UserSchema.post('save', function (doc, next) {
 UserSchema.statics.isUserExist = async function (
   email: string,
 ): Promise<TUser | null> {
-  return this.findOne({ email }).select('+password').lean();
+  return this.findOne({ email }).select('+password');
 };
 
 // Check if a user exists by phone number
