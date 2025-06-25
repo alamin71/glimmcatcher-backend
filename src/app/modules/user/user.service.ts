@@ -146,8 +146,6 @@ const signupuser = async (payload: TUser) => {
     user: result,
     token,
   };
-
-  return result;
 };
 
 const getme = async (id: string) => {
@@ -188,7 +186,7 @@ const getSingleUser = async (id: string) => {
   return result;
 };
 const getAllUsers = async () => {
-  const users = await User.find(); 
+  const users = await User.find();
   return users;
 };
 
