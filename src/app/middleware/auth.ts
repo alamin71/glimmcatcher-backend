@@ -22,7 +22,7 @@ const auth = (...userRoles: string[]) => {
     } catch (err) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'unauthorized');
     }
-    const { role, userId } = decode;
+    const { role, userId } = decode as JwtPayload;
     console.log('JWT Decode:', decode);
     const isUserExist = await User.IsUserExistbyId(userId);
     if (!isUserExist) {
