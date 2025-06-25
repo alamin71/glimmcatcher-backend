@@ -77,6 +77,12 @@ const login = async (payload: Tlogin) => {
     config.jwt_refresh_secret as string,
     config.jwt_refresh_expires_in as string,
   );
+
+  console.log('Token:', accessToken);
+  console.log(
+    'Decoded:',
+    jwt.verify(accessToken, config.jwt_access_secret as string),
+  );
   return {
     accessToken,
     refreshToken,
