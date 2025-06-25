@@ -23,8 +23,7 @@ const auth = (...userRoles: string[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'unauthorized');
     }
     const { role, userId } = decode;
-    console.log('Decoded:', decode); // ✅ Show token content
-    console.log('userId:', userId);
+    console.log('JWT Decode:', decode);
     const isUserExist = await User.IsUserExistbyId(userId);
     if (!isUserExist) {
       throw new AppError(httpStatus.NOT_FOUND, 'user not found');

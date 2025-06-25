@@ -138,10 +138,18 @@ UserSchema.statics.isUserExistByNumber = async function (
 //   return this.findById(id);
 // };
 
+// UserSchema.statics.IsUserExistbyId = async function (
+//   id: string,
+// ): Promise<Pick<TUser, '_id' | 'email' | 'role' | 'password'> | null> {
+//   return this.findById(id).select('+password');
+// };
+
 UserSchema.statics.IsUserExistbyId = async function (
   id: string,
 ): Promise<Pick<TUser, '_id' | 'email' | 'role' | 'password'> | null> {
-  return this.findById(id).select('+password');
+  return this.findOne({ _id: id, isDeleted: { $ne: true } }).select(
+    '+password',
+  );
 };
 
 // Compare plain text password with hashed password
