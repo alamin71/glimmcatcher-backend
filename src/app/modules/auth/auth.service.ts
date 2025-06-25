@@ -160,7 +160,7 @@ const changePassword = async (_id: string, payload: TchangePassword) => {
   );
 
   const result = await User.findByIdAndUpdate(
-    id,
+    _id,
     {
       $set: {
         password: hashedPassword,
