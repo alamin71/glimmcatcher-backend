@@ -77,12 +77,6 @@ const login = async (payload: Tlogin) => {
     config.jwt_refresh_secret as string,
     config.jwt_refresh_expires_in as string,
   );
-
-  console.log('Token:', accessToken);
-  console.log(
-    'Decoded:',
-    jwt.verify(accessToken, config.jwt_access_secret as string),
-  );
   return {
     accessToken,
     refreshToken,
@@ -120,8 +114,8 @@ const login = async (payload: Tlogin) => {
 //   );
 //   return result;
 // };
-const changePassword = async (_id: string, payload: TchangePassword) => {
-  const user = await User.IsUserExistbyId(_id);
+const changePassword = async (id: string, payload: TchangePassword) => {
+  const user = await User.IsUserExistbyId(id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
@@ -160,7 +154,7 @@ const changePassword = async (_id: string, payload: TchangePassword) => {
   );
 
   const result = await User.findByIdAndUpdate(
-    _id,
+    id,
     {
       $set: {
         password: hashedPassword,
