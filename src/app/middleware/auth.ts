@@ -19,6 +19,7 @@ const auth = (...userRoles: string[]) => {
         token,
         config.jwt_access_secret as string,
       ) as JwtPayload;
+      console.log('Token Decode:', decode);
     } catch (err) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'unauthorized');
     }

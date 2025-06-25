@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { model, Schema } from 'mongoose';
 import config from '../../config';
 import { TUser, UserModel, UserRole } from './user.interface';
+import { Types } from 'mongoose';
 
 // Define the schema for Verification
 const VerificationSchema = new Schema({
@@ -147,9 +148,10 @@ UserSchema.statics.isUserExistByNumber = async function (
 UserSchema.statics.IsUserExistbyId = async function (
   id: string,
 ): Promise<Pick<TUser, '_id' | 'email' | 'role' | 'password'> | null> {
-  return this.findOne({ _id: id, isDeleted: { $ne: true } }).select(
-    '+password',
-  );
+  return this.findOne({
+    _id: new Types.ObjectId(id),
+    isDeleted: { $ne: true },
+  }).select('+password');
 };
 
 // Compare plain text password with hashed password
