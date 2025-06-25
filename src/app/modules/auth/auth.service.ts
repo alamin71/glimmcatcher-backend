@@ -228,7 +228,7 @@ const forgotPassword = async (email: string) => {
   }
   const jwtPayload = {
     email: email,
-    id: user?._id,
+    id: user?._id.toString(),
   };
   const token = jwt.sign(jwtPayload, config.jwt_access_secret as Secret, {
     expiresIn: '5m',
