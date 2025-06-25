@@ -11,6 +11,7 @@ import { generateOtp } from '../../utils/otpGenerator';
 import User from '../user/user.model';
 import { TchangePassword, Tlogin, TresetPassword } from './auth.interface';
 import { createToken, verifyToken } from './auth.utils';
+import { string } from 'zod';
 
 const login = async (payload: Tlogin) => {
   const user = await User.isUserExist(payload?.email as string);
@@ -62,7 +63,7 @@ const login = async (payload: Tlogin) => {
   }
 
   const jwtPayload = {
-    userId: user?._id,
+    userId: user?._id.toString(),
     role: user.role,
   };
   const accessToken = createToken(
