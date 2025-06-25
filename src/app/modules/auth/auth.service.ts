@@ -120,8 +120,8 @@ const login = async (payload: Tlogin) => {
 //   );
 //   return result;
 // };
-const changePassword = async (id: string, payload: TchangePassword) => {
-  const user = await User.IsUserExistbyId(id);
+const changePassword = async (_id: string, payload: TchangePassword) => {
+  const user = await User.IsUserExistbyId(_id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
