@@ -38,11 +38,11 @@ router.get(
   auth(USER_ROLE.vendor, USER_ROLE.admin),
   userControllers.getsingleUser,
 );
-router.get(
-  '/',
-  auth(USER_ROLE.vendor, USER_ROLE.admin),
-  userControllers.getAllUsers,
-);
+// router.get(
+//   '/',
+//   auth(USER_ROLE.vendor, USER_ROLE.admin),
+//   userControllers.getAllUsers,
+// );
 
 router.patch(
   '/:id',
