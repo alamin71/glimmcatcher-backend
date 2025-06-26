@@ -299,7 +299,11 @@ const initiateSignup = async (payload: {
   // send email
   await sendOtpEmail(payload.email, otp, expiresAt);
 
-  return { token };
+  // return { token };
+  return {
+    token,
+    ...(process.env.NODE_ENV !== 'production' && { otp }), // only show OTP in dev
+  };
 };
 
 // 2. Signup: verify OTP & create user
@@ -432,7 +436,11 @@ const initiateForgotPassword = async (email: string) => {
 
   await sendOtpEmail(email, otp, expiresAt);
 
-  return { token };
+  // return { token };
+  return {
+    token,
+    ...(process.env.NODE_ENV !== 'production' && { otp }), // only show OTP in dev
+  };
 };
 
 // 5. Verify forgot password OTP and allow reset

@@ -41,6 +41,7 @@ router.post(
   otpControllers.verifyForgotPasswordOtp,
 );
 
-router.post('/forgot-password/resend', otpControllers.resendForgotPasswordOtp);
+router.post('/signup/resend', otpControllers.resendSignupOtp);
+router.post('/forgot/resend', otpControllers.resendForgotPasswordOtp);
 
 export const otpRoutes = router;
