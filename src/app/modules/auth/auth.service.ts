@@ -83,37 +83,6 @@ const login = async (payload: Tlogin) => {
   };
 };
 //change password
-// const changePassword = async (id: string, payload: TchangePassword) => {
-//   const user = await User.IsUserExistbyId(id);
-//   if (!user) {
-//     throw new AppError(httpStatus.NOT_FOUND, 'user not found');
-//   }
-
-//   if (!(await User.isPasswordMatched(payload?.oldPassword, user.password))) {
-//     throw new AppError(httpStatus.FORBIDDEN, 'old password do not match!');
-//   }
-//   if (payload?.newPassword !== payload?.confirmPassword) {
-//     throw new AppError(
-//       httpStatus.BAD_REQUEST,
-//       'New password and confirm password do not match!',
-//     );
-//   }
-//   const hashedPassword = await bcrypt.hash(
-//     payload?.newPassword,
-//     Number(config.bcrypt_salt_rounds),
-//   );
-//   const result = await User.findByIdAndUpdate(
-//     id,
-//     {
-//       $set: {
-//         password: hashedPassword,
-//         passwordChangedAt: new Date(),
-//       },
-//     },
-//     { new: true },
-//   );
-//   return result;
-// };
 const changePassword = async (id: string, payload: TchangePassword) => {
   const user = await User.IsUserExistbyId(id);
   if (!user) {
@@ -166,51 +135,6 @@ const changePassword = async (id: string, payload: TchangePassword) => {
 
   return result;
 };
-
-// const changePassword = async (id: string, payload: TchangePassword) => {
-//   // Password সহ user খুঁজে আনা
-//   const user = await User.findById(id).select('+password');
-//   if (!user) {
-//     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
-//   }
-
-//   // পুরানো পাসওয়ার্ড মিলে কিনা যাচাই
-//   const isPasswordValid = await User.isPasswordMatched(
-//     payload.oldPassword,
-//     user.password,
-//   );
-
-//   if (!isPasswordValid) {
-//     throw new AppError(httpStatus.FORBIDDEN, 'Old password does not match!');
-//   }
-
-//   // নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলে কিনা যাচাই
-//   if (payload.newPassword !== payload.confirmPassword) {
-//     throw new AppError(
-//       httpStatus.BAD_REQUEST,
-//       'New password and confirm password do not match!',
-//     );
-//   }
-
-//   // নতুন পাসওয়ার্ড হ্যাশ করে update করা
-//   const hashedPassword = await bcrypt.hash(
-//     payload.newPassword,
-//     Number(config.bcrypt_salt_rounds),
-//   );
-
-//   const result = await User.findByIdAndUpdate(
-//     id,
-//     {
-//       $set: {
-//         password: hashedPassword,
-//         passwordChangedAt: new Date(),
-//       },
-//     },
-//     { new: true },
-//   );
-
-//   return result;
-// };
 
 // forgot password
 

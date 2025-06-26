@@ -109,10 +109,18 @@ const UserSchema = new Schema<TUser, UserModel>(
 );
 
 // Pre-save hook to hash password if it is modified or new
+// UserSchema.pre('save', async function (next) {
+//   const user = this;
+//   user.password = await bcrypt.hash(
+//     user.password as string,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+//   next();
+// });
 UserSchema.pre('save', async function (next) {
-  const user = this;
-  user.password = await bcrypt.hash(
-    user.password as string,
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(
+    this.password as string,
     Number(config.bcrypt_salt_rounds),
   );
   next();

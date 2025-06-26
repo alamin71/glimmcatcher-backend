@@ -22,6 +22,6 @@ router.patch(
   auth(USER_ROLE.sup_admin, USER_ROLE.user),
   authControllers.changePassword,
 );
-router.post('/forgot-password', authControllers.forgotPassword);
+// router.post('/forgot-password', authControllers.forgotPassword);
 router.patch('/reset-password', authControllers.resetPassword);
 export const authRoutes = router;

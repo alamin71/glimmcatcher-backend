@@ -23,7 +23,7 @@ interface image {
 export interface TUser {
   [x: string]: any;
   id?: string;
-  email?: string;
+  email: string;
   password: string;
   name: string;
   phoneNumber: string;
