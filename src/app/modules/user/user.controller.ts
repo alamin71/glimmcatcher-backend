@@ -79,7 +79,6 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const deleteAccount = catchAsync(async (req: Request, res: Response) => {
   console.log(req.body, 'DD');
   const result = await userServices.deleteAccount(

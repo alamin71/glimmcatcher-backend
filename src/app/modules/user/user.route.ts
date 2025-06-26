@@ -39,7 +39,7 @@ router.get(
   userControllers.getsingleUser,
 );
 router.get(
-  '/:id',
+  '/',
   auth(USER_ROLE.vendor, USER_ROLE.admin),
   userControllers.getAllUsers,
 );
