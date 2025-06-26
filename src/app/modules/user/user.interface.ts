@@ -4,6 +4,7 @@ export enum UserRole {
   super_admin = 'super_admin',
   admin = 'admin',
   user = 'user',
+  customer = 'customer',
 }
 export enum status {
   pending = 'pending',

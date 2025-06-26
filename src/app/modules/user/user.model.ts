@@ -74,11 +74,18 @@ const UserSchema = new Schema<TUser, UserModel>(
       enum: ['custom', 'google', 'facebook'],
       default: 'custom',
     },
+    // role: {
+    //   type: String,
+    //   enum: Object.values(UserRole),
+    //   required: true,
+    // },
     role: {
       type: String,
       enum: Object.values(UserRole),
       required: true,
+      default: UserRole.customer, // ✅ Fix: Add default
     },
+
     isActive: {
       type: Boolean,
       default: true,
