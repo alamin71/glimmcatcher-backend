@@ -1,10 +1,10 @@
-// // /* eslint-disable @typescript-eslint/no-explicit-any */
-// // import bcrypt from 'bcrypt';
-// // import httpStatus from 'http-status';
-// // import AppError from '../../error/AppError';
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// import bcrypt from 'bcrypt';
+// import httpStatus from 'http-status';
+// import AppError from '../../error/AppError';
 
-// // import { TUser } from './user.interface';
-// // import User from './user.model';
+// import { TUser } from './user.interface';
+// import User from './user.model';
 // // // customer
 
 // // // login with google customer
@@ -253,7 +253,7 @@ const signupuser = async (payload: TUser) => {
     otpExpiresAt: expiresAt.toDate(),
   };
 
-  const token = jwt.sign(jwtPayload, config.jwt_otp_secret as Secret, {
+  const token = jwt.sign(jwtPayload, config.jwt_access_secret as Secret, {
     expiresIn: '5m',
   });
 
