@@ -64,7 +64,7 @@ const login = async (payload: Tlogin) => {
 
   const jwtPayload = {
     userId: user?._id.toString(),
-    role: user.role,
+    role: user?.role,
   };
   const accessToken = createToken(
     jwtPayload,
@@ -114,21 +114,91 @@ const login = async (payload: Tlogin) => {
 //   );
 //   return result;
 // };
+// const changePassword = async (id: string, payload: TchangePassword) => {
+//   const user = await User.IsUserExistbyId(id);
+//   if (!user) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//   }
+
+//   const isOldPasswordValid = await User.isPasswordMatched(
+//     payload.oldPassword,
+//     user.password,
+//   );
+
+//   if (!isOldPasswordValid) {
+//     throw new AppError(httpStatus.FORBIDDEN, 'Old password does not match!');
+//   }
+
+//   if (payload.newPassword !== payload.confirmPassword) {
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'New password and confirm password do not match!',
+//     );
+//   }
+
+//   const isSameAsOld = await User.isPasswordMatched(
+//     payload.newPassword,
+//     user.password,
+//   );
+
+//   if (isSameAsOld) {
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'New password cannot be same as old password!',
+//     );
+//   }
+
+//   const hashedPassword = await bcrypt.hash(
+//     payload.newPassword,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+
+//   const result = await User.findByIdAndUpdate(
+//     id,
+//     {
+//       $set: {
+//         password: hashedPassword,
+//         passwordChangedAt: new Date(),
+//       },
+//     },
+//     { new: true },
+//   );
+
+//   return result;
+// };
 const changePassword = async (id: string, payload: TchangePassword) => {
-  const user = await User.IsUserExistbyId(id);
+  // ✅ 1. Find user with password field explicitly selected
+  const user = await User.findById(id).select('+password');
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
+  if (!user?.isVerified) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'Account is not verified yet! Please verify OTP first.',
+    );
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Account is deleted!');
+  }
+
+  if (!user?.isActive || user?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'Account is inactive or blocked!');
+  }
+
+  // ✅ 2. Old password validation
   const isOldPasswordValid = await User.isPasswordMatched(
     payload.oldPassword,
     user.password,
   );
-
   if (!isOldPasswordValid) {
     throw new AppError(httpStatus.FORBIDDEN, 'Old password does not match!');
   }
 
+  // ✅ 3. New password checks
   if (payload.newPassword !== payload.confirmPassword) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -140,7 +210,6 @@ const changePassword = async (id: string, payload: TchangePassword) => {
     payload.newPassword,
     user.password,
   );
-
   if (isSameAsOld) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -148,23 +217,17 @@ const changePassword = async (id: string, payload: TchangePassword) => {
     );
   }
 
+  // ✅ 4. Hash and update password
   const hashedPassword = await bcrypt.hash(
     payload.newPassword,
     Number(config.bcrypt_salt_rounds),
   );
 
-  const result = await User.findByIdAndUpdate(
-    id,
-    {
-      $set: {
-        password: hashedPassword,
-        passwordChangedAt: new Date(),
-      },
-    },
-    { new: true },
-  );
+  user.password = hashedPassword;
+  user.passwordChangedAt = new Date();
 
-  return result;
+  await user.save(); // ✅ .save() ensures pre-save hooks run if any
+  return user;
 };
 
 // const changePassword = async (id: string, payload: TchangePassword) => {
