@@ -13,11 +13,11 @@ import User from './user.model';
 
 // // employee
 
-const signupuser = async (payload: TUser) => {
-  const result = await User.create(payload);
+// const signupuser = async (payload: TUser) => {
+//   const result = await User.create(payload);
 
-  return result;
-};
+//   return result;
+// };
 
 const getme = async (id: string) => {
   const result = await User.findById(id);
@@ -49,6 +49,11 @@ const updateProfile = async (id: string, payload: Partial<TUser>) => {
   let result;
 
   return result;
+};
+
+const getAllUsers = async () => {
+  const users = await User.find();
+  return users;
 };
 
 const getSingleUser = async (id: string) => {
@@ -86,7 +91,8 @@ export const userServices = {
   getSingleUser,
   deleteAccount,
   updatePhoneNumber,
-  signupuser,
+  getAllUsers,
+  // signupuser,
 };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

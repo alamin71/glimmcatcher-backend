@@ -13,7 +13,7 @@ import { otpValidation } from '../otp/otp.validation';
 
 const router = Router();
 
-// 📌 User Signup OTP Flow
+// User Signup OTP
 router.post(
   '/signup-initiate',
   validateRequest(otpValidation.signupInitiateSchema),
@@ -28,7 +28,7 @@ router.post(
 
 router.post('/signup-resend', otpControllers.resendSignupOtp);
 
-// 📌 Forgot Password OTP Flow
+//  Forgot Password OTP
 router.post(
   '/forgot-password',
   validateRequest(otpValidation.forgotPasswordSchema),

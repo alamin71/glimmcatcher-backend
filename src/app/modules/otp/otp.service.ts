@@ -357,7 +357,7 @@ const verifySignupOtp = async (token: string, otp: string | number) => {
   const accessToken = jwt.sign(
     { id: newUser._id, role: newUser.role },
     config.jwt_access_secret as Secret,
-    { expiresIn: '7d' },
+    { expiresIn: '30d' },
   );
 
   return { user: newUser, token: accessToken };

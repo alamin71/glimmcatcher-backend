@@ -10,13 +10,8 @@ import { authValidation } from '../auth/auth.validation';
 
 const router = Router();
 
-router.post(
-  '/signup',
-  validateRequest(userValidation.createUserZodSchema),
-  userControllers.signupuser,
-);
 router.patch(
-  '/',
+  '/update-profile',
   auth(USER_ROLE.user, USER_ROLE.sup_admin),
   upload.single('file'),
   userControllers.updateProfile,
@@ -38,11 +33,11 @@ router.get(
   auth(USER_ROLE.vendor, USER_ROLE.admin),
   userControllers.getsingleUser,
 );
-// router.get(
-//   '/',
-//   auth(USER_ROLE.vendor, USER_ROLE.admin),
-//   userControllers.getAllUsers,
-// );
+router.get(
+  '/',
+  auth(USER_ROLE.vendor, USER_ROLE.admin),
+  userControllers.getAllUsers,
+);
 
 router.patch(
   '/:id',

@@ -56,8 +56,7 @@ const login = async (payload: Tlogin) => {
   //   default:
   //     break;
   // }
-  console.log('Plain password:', payload.password);
-  console.log('Hashed password:', user.password);
+
   if (!(await User.isPasswordMatched(payload.password, user.password))) {
     throw new AppError(httpStatus.BAD_REQUEST, 'password do not match');
   }

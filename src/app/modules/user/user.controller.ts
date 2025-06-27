@@ -8,18 +8,18 @@ import { UserRole } from './user.interface';
 
 // create employee
 
-const signupuser = catchAsync(async (req: Request, res: Response) => {
-  const result = await userServices.signupuser({
-    ...req.body,
-    role: UserRole.user,
-  });
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'signup succesfully',
-    data: result,
-  });
-});
+// const signupuser = catchAsync(async (req: Request, res: Response) => {
+//   const result = await userServices.signupuser({
+//     ...req.body,
+//     role: UserRole.user,
+//   });
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'signup succesfully',
+//     data: result,
+//   });
+// });
 const getme = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.getme(req.user.userId);
   sendResponse(res, {
@@ -69,15 +69,15 @@ const getsingleUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-// const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-//   const result = await userServices.getAllUsers();
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'All users retrieved successfully',
-//     data: result,
-//   });
-// });
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.getAllUsers();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'All users retrieved successfully',
+    data: result,
+  });
+});
 
 const deleteAccount = catchAsync(async (req: Request, res: Response) => {
   console.log(req.body, 'DD');
@@ -95,10 +95,9 @@ const deleteAccount = catchAsync(async (req: Request, res: Response) => {
 
 export const userControllers = {
   getme,
-  signupuser,
   updateProfile,
   getsingleUser,
-  // getAllUsers,
+  getAllUsers,
   deleteAccount,
   updatePhoneNumber,
 };
