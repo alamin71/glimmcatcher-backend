@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/login', adminControllers.adminLogin);
 
 // Protected admin route: only allow super_admin
-router.get('/dashboard', auth('admin'), (req, res) => {
+router.get('/dashboard', auth('admin', 'super_admin'), (req, res) => {
   res.json({
     success: true,
     message: 'Welcome to Admin Dashboard',
