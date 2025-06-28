@@ -364,6 +364,46 @@ const verifySignupOtp = async (token: string, otp: string | number) => {
 };
 
 // 3. Resend Signup OTP
+// const resendSignupOtp = async (token: string) => {
+//   if (!token) {
+//     throw new AppError(httpStatus.UNAUTHORIZED, 'Token is required');
+//   }
+//   let decoded: JwtPayloadExtended;
+//   try {
+//     decoded = jwt.verify(
+//       token,
+//       config.jwt_access_secret as string,
+//     ) as JwtPayloadExtended;
+//   } catch {
+//     throw new AppError(httpStatus.FORBIDDEN, 'Token expired or invalid');
+//   }
+
+//   if (decoded.mode !== 'signup' || !decoded.email) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid token for resend OTP');
+//   }
+
+//   const otp = generateOtp();
+//   const expiresAt = moment().add(5, 'minute').toDate();
+
+//   // regenerate token with new OTP and expiry
+//   const newTokenPayload = {
+//     ...decoded,
+//     otp,
+//     expiresAt,
+//   };
+
+//   const newToken = jwt.sign(
+//     newTokenPayload,
+//     config.jwt_access_secret as Secret,
+//     {
+//       expiresIn: '5m',
+//     },
+//   );
+
+//   await sendOtpEmail(decoded.email, otp, expiresAt);
+
+//   return { token: newToken };
+// };
 const resendSignupOtp = async (token: string) => {
   if (!token) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Token is required');
@@ -385,9 +425,11 @@ const resendSignupOtp = async (token: string) => {
   const otp = generateOtp();
   const expiresAt = moment().add(5, 'minute').toDate();
 
-  // regenerate token with new OTP and expiry
+  // decoded থেকে exp, iat বাদ দিয়ে নতুন payload তৈরি করলাম
+  const { exp, iat, ...safeDecoded } = decoded;
+
   const newTokenPayload = {
-    ...decoded,
+    ...safeDecoded,
     otp,
     expiresAt,
   };
