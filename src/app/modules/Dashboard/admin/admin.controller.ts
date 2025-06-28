@@ -38,6 +38,7 @@
 // export const adminControllers = {
 //   adminLogin,
 // };
+// src/app/modules/Dashboard/admin/admin.controller.ts
 import { Request, Response } from 'express';
 import catchAsync from '../../../utils/catchAsync';
 import httpStatus from 'http-status';
@@ -47,27 +48,7 @@ import config from '../../../config';
 import AppError from '../../../error/AppError';
 import sendResponse from '../../../utils/sendResponse';
 
-import mongoose from 'mongoose';
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(config.database_url as string);
-    console.log('MongoDB connected');
-  } catch (error) {
-    console.error('MongoDB connection failed:', error);
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      'Database connection failed',
-    );
-  }
-};
-
 const adminLogin = catchAsync(async (req: Request, res: Response) => {
-  // Ensure DB connection
-  if (mongoose.connection.readyState !== 1) {
-    await connectDB();
-  }
-
   const { email, password } = req.body;
 
   const admin = await Admin.findOne({ email }).select('+password');

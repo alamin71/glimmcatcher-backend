@@ -1,5 +1,6 @@
 // scripts/adminSeeder.ts
 import mongoose from 'mongoose';
+import config from '../src/app/config';
 import dotenv from 'dotenv';
 import { Admin } from '../src/app/modules/Dashboard/admin/admin.model'; // admin model import
 
@@ -7,7 +8,7 @@ dotenv.config();
 
 const seedAdmin = async () => {
   try {
-    await mongoose.connect(process.env.DATABASE_URL as string);
+    await mongoose.connect(config.database_url as string);
 
     const email = 'admin@gmail.com';
     const existing = await Admin.findOne({ email });
