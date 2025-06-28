@@ -15,7 +15,7 @@ const AdminSchema = new Schema<TAdminDoc>(
   },
 );
 
-// ✅ Password hash before save
+// ✅ Pre-save password hashing
 AdminSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(
@@ -25,10 +25,17 @@ AdminSchema.pre('save', async function (next) {
   next();
 });
 
-// ✅ Define static method with proper type
+// ✅ Instance method for comparing password
+AdminSchema.methods.isPasswordMatched = async function (
+  enteredPassword: string,
+): Promise<boolean> {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// ✅ Static method
 AdminSchema.statics.isAdminExist = function (email: string) {
   return this.findOne({ email }).select('+password');
 };
 
-// ✅ Use correct model typing: <DocumentType, ModelType>
+// ✅ Export model
 export const Admin = model<TAdminDoc, AdminModel>('Admin', AdminSchema);
