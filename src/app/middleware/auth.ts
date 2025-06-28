@@ -134,6 +134,51 @@
 //   });
 // };
 // export default auth;
+// import { Request, Response, NextFunction } from 'express';
+// import jwt, { JwtPayload } from 'jsonwebtoken';
+// import httpStatus from 'http-status';
+// import config from '../config';
+// import AppError from '../error/AppError';
+// import catchAsync from '../utils/catchAsync';
+// import User from '../modules/user/user.model';
+
+// const auth = (...userRoles: string[]) => {
+//   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//     const token = req?.headers?.authorization?.split(' ')[1];
+
+//     if (!token) {
+//       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
+//     }
+
+//     let decode: JwtPayload;
+//     try {
+//       decode = jwt.verify(
+//         token,
+//         config.jwt_access_secret as string,
+//       ) as JwtPayload;
+//     } catch (err) {
+//       throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized');
+//     }
+
+//     const id = decode.id || decode.userId;
+//     const role = decode.role;
+
+//     const isUserExist = await User.IsUserExistbyId(id);
+//     if (!isUserExist) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//     }
+
+//     if (userRoles.length && !userRoles.includes(role)) {
+//       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+//     }
+
+//     req.user = { userId: id, role }; // ✅ Use userId to match controller
+//     next();
+//   });
+// };
+
+// export default auth;
+
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import httpStatus from 'http-status';
@@ -141,6 +186,7 @@ import config from '../config';
 import AppError from '../error/AppError';
 import catchAsync from '../utils/catchAsync';
 import User from '../modules/user/user.model';
+import { Admin } from '../modules/Dashboard/admin/admin.model'; // অ্যাডমিন মডেল ইমপোর্ট
 
 const auth = (...userRoles: string[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -163,16 +209,22 @@ const auth = (...userRoles: string[]) => {
     const id = decode.id || decode.userId;
     const role = decode.role;
 
-    const isUserExist = await User.IsUserExistbyId(id);
-    if (!isUserExist) {
-      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    let isExist = null;
+    if (role === 'admin' || role === 'super_admin') {
+      isExist = await Admin.findById(id).select('+password');
+    } else {
+      isExist = await User.IsUserExistbyId(id);
+    }
+
+    if (!isExist) {
+      throw new AppError(httpStatus.NOT_FOUND, `${role} not found`);
     }
 
     if (userRoles.length && !userRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
 
-    req.user = { userId: id, role }; // ✅ Use userId to match controller
+    req.user = { userId: id, role };
     next();
   });
 };
