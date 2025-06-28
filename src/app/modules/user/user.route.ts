@@ -43,12 +43,12 @@ router.patch(
   '/:id',
   auth(USER_ROLE.user),
   parseData(),
-  auth(USER_ROLE.sup_admin),
+  auth(USER_ROLE.sup_admin, USER_ROLE.admin),
   userControllers.updateProfile,
 );
 router.delete(
   '/',
-  auth(USER_ROLE.user, USER_ROLE.sup_admin),
+  auth(USER_ROLE.user, USER_ROLE.sup_admin, USER_ROLE.admin),
   validateRequest(authValidation.deleteAccountZodSchema),
   userControllers.deleteAccount,
 );
