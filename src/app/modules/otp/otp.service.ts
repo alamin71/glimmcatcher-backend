@@ -438,13 +438,16 @@ const resendSignupOtp = async (token: string) => {
     newTokenPayload,
     config.jwt_access_secret as Secret,
     {
-      expiresIn: '5m',
+      expiresIn: '10m',
     },
   );
 
   await sendOtpEmail(decoded.email, otp, expiresAt);
 
-  return { token: newToken };
+  return {
+    token: newToken,
+    ...(process.env.NODE_ENV !== 'production' && { otp }), // dev mode এ otp রিটার্ন করবে
+  };
 };
 
 // 4. Forgot password - send OTP and token

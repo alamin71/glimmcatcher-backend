@@ -89,6 +89,42 @@ import config from '../../config';
 import AppError from '../../error/AppError';
 import User from '../user/user.model';
 
+// const login = catchAsync(async (req: Request, res: Response) => {
+//   const { email, password } = req.body;
+//   const user = await User.findOne({ email }).select('+password');
+
+//   if (!user || !user?.password) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//   }
+
+//   const isPasswordMatched = await bcrypt.compare(password, user.password);
+//   if (!isPasswordMatched) {
+//     throw new AppError(httpStatus.UNAUTHORIZED, 'Incorrect password');
+//   }
+
+//   const token = jwt.sign(
+//     {
+//       id: user._id,
+//       role: user.role,
+//     },
+//     config.jwt_access_secret as Secret,
+//     { expiresIn: config.jwt_access_expires_in },
+//   );
+
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Login successful',
+//     data: {
+//       user,
+//       token,
+//     },
+//   });
+// });
+
+// 1. Forgot Password already handled via `otp.controller.ts`
+
+// 2. Reset Password - set new password after OTP verification
 const login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email }).select('+password');
@@ -102,7 +138,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Incorrect password');
   }
 
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     {
       id: user._id,
       role: user.role,
@@ -111,20 +147,27 @@ const login = catchAsync(async (req: Request, res: Response) => {
     { expiresIn: config.jwt_access_expires_in },
   );
 
+  const refreshToken = jwt.sign(
+    {
+      id: user._id,
+      role: user.role,
+    },
+    config.jwt_refresh_secret as Secret,
+    { expiresIn: config.jwt_refresh_expires_in },
+  );
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Login successful',
     data: {
       user,
-      token,
+      accessToken,
+      refreshToken,
     },
   });
 });
 
-// 1. Forgot Password already handled via `otp.controller.ts`
-
-// 2. Reset Password - set new password after OTP verification
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
   const token = req.headers.token as string;
   const { newPassword } = req.body;
