@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import httpStatus from 'http-status';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import config from '../config/index';
-import AppError from '../error/AppError';
-import User from '../modules/user/user.model';
-import catchAsync from '../utils/catchAsync';
+// import httpStatus from 'http-status';
+// import jwt, { JwtPayload } from 'jsonwebtoken';
+// import config from '../config/index';
+// import AppError from '../error/AppError';
+// import User from '../modules/user/user.model';
+// import catchAsync from '../utils/catchAsync';
 
 // const auth = (...userRoles: string[]) => {
 //   return catchAsync(async (req, res, next) => {
@@ -97,40 +97,84 @@ import catchAsync from '../utils/catchAsync';
 
 // export default auth;
 
+// const auth = (...userRoles: string[]) => {
+//   return catchAsync(async (req, res, next) => {
+//     const token = req?.headers?.authorization?.split(' ')[1];
+
+//     if (!token) {
+//       throw new AppError(httpStatus.UNAUTHORIZED, 'you are not authorized!');
+//     }
+
+//     let decode;
+//     try {
+//       decode = jwt.verify(
+//         token,
+//         config.jwt_access_secret as string,
+//       ) as JwtPayload;
+//       console.log('Token Decode:', decode);
+//     } catch (err) {
+//       throw new AppError(httpStatus.UNAUTHORIZED, 'unauthorized');
+//     }
+
+//     const id = decode.id || decode.userId;
+//     const role = decode.role;
+
+//     console.log('JWT Decode:', decode);
+//     const isUserExist = await User.IsUserExistbyId(id);
+//     if (!isUserExist) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+//     }
+
+//     if (userRoles && !userRoles.includes(role)) {
+//       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+//     }
+
+//     req.user = { id, role };
+//     next();
+//   });
+// };
+// export default auth;
+import { Request, Response, NextFunction } from 'express';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import httpStatus from 'http-status';
+import config from '../config';
+import AppError from '../error/AppError';
+import catchAsync from '../utils/catchAsync';
+import User from '../modules/user/user.model';
+
 const auth = (...userRoles: string[]) => {
-  return catchAsync(async (req, res, next) => {
+  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req?.headers?.authorization?.split(' ')[1];
 
     if (!token) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'you are not authorized!');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-    let decode;
+    let decode: JwtPayload;
     try {
       decode = jwt.verify(
         token,
         config.jwt_access_secret as string,
       ) as JwtPayload;
-      console.log('Token Decode:', decode);
     } catch (err) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'unauthorized');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized');
     }
 
     const id = decode.id || decode.userId;
     const role = decode.role;
 
-    console.log('JWT Decode:', decode);
     const isUserExist = await User.IsUserExistbyId(id);
     if (!isUserExist) {
-      throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
     }
 
-    if (userRoles && !userRoles.includes(role)) {
+    if (userRoles.length && !userRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
 
-    req.user = { id, role };
+    req.user = { userId: id, role }; // ✅ Use userId to match controller
     next();
   });
 };
+
 export default auth;

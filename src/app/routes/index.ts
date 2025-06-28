@@ -4,6 +4,7 @@ import { contentRoues } from '../modules/content/content.route';
 import { otpRoutes } from '../modules/otp/otp.routes';
 import { userRoutes } from '../modules/user/user.route';
 import walletRoutes from '../modules/wallet/wallet.route';
+import adminRoutes from '../modules/Dashboard/admin/admin.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -15,6 +16,10 @@ const moduleRoutes = [
   {
     path: '/auth',
     route: authRoutes,
+  },
+  {
+    path: '/admin',
+    route: adminRoutes,
   },
   {
     path: '/otp',

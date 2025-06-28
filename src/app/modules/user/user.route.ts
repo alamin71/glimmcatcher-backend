@@ -19,7 +19,7 @@ router.patch(
 
 router.patch(
   '/phone/update',
-
+  auth(USER_ROLE.user),
   userControllers.updatePhoneNumber,
 );
 router.get(

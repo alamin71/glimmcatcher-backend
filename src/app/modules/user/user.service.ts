@@ -1,99 +1,104 @@
 // /* eslint-disable @typescript-eslint/no-explicit-any */
-import bcrypt from 'bcrypt';
-import httpStatus from 'http-status';
-import AppError from '../../error/AppError';
+// import bcrypt from 'bcrypt';
+// import httpStatus from 'http-status';
+// import AppError from '../../error/AppError';
 
-import { TUser } from './user.interface';
-import User from './user.model';
-// // customer
+// import { TUser } from './user.interface';
+// import User from './user.model';
+// // // customer
 
-// // login with google customer
+// // // login with google customer
 
-// // provider
+// // // provider
 
-// // employee
+// // // employee
 
-// const signupuser = async (payload: TUser) => {
-//   const result = await User.create(payload);
+// // const signupuser = async (payload: TUser) => {
+// //   const result = await User.create(payload);
+
+// //   return result;
+// // };
+
+// const getme = async (id: string) => {
+//   const result = await User.findById(id);
+//   const data = {
+//     email: result?.email,
+//     fullName: result?.fullName,
+//     countryCode: result?.countryCode,
+//     phoneNumber: result?.phoneNumber,
+//     image: result?.image ?? {},
+//   };
+//   return data;
+// };
+
+// const updateProfile = async (id: string, payload: Partial<TUser>) => {
+//   const user = await User.findById(id);
+
+//   if (!user) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found !!');
+//   }
+
+//   // Prevent updating phoneNumber
+//   if (payload?.phoneNumber) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'phoneNumber is not for update');
+//   }
+
+//   // Prevent updating role
+//   if (payload?.role) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'role is not for update');
+//   }
+
+//   // Perform the update and return the updated user
+//   const result = await User.findByIdAndUpdate(id, payload, {
+//     new: true,
+//   });
 
 //   return result;
 // };
 
-const getme = async (id: string) => {
-  const result = await User.findById(id);
-  const data = {
-    email: result?.email,
-    fullName: result?.fullName,
-    countryCode: result?.countryCode,
-    phoneNumber: result?.phoneNumber,
-    image: result?.image ?? {},
-  };
-  return data;
-};
+// const getAllUsers = async () => {
+//   const users = await User.find();
+//   return users;
+// };
 
-const updateProfile = async (id: string, payload: Partial<TUser>) => {
-  const user = await User.findById(id);
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found !!');
-  }
-  //  email update lagbe na
-  if (payload?.phoneNumber) {
-    throw new AppError(
-      httpStatus?.BAD_REQUEST,
-      'phoneNumber is not for update',
-    );
-  }
-  if (payload?.role) {
-    throw new AppError(httpStatus?.BAD_REQUEST, 'role is not for update');
-  }
-  let result;
+// const getSingleUser = async (id: string) => {
+//   const result = await User.findById(id);
+//   return result;
+// };
+// const deleteAccount = async (id: string, password: string) => {
+//   const user = await User.IsUserExistbyId(id);
+//   const isPasswordMatched = await bcrypt.compare(password, user?.password);
+//   if (!isPasswordMatched) {
+//     throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Password does not match!');
+//   }
+//   const result = await User.findByIdAndUpdate(
+//     id,
+//     {
+//       $set: {
+//         isDeleted: true,
+//       },
+//     },
+//     {
+//       new: true,
+//     },
+//   );
+//   return result;
+// };
 
-  return result;
-};
+// const updatePhoneNumber = async (id: string, payload: any) => {
+//   const result = await User.findByIdAndUpdate(id, payload);
+//   return result;
+// };
 
-const getAllUsers = async () => {
-  const users = await User.find();
-  return users;
-};
-
-const getSingleUser = async (id: string) => {
-  const result = await User.findById(id);
-  return result;
-};
-const deleteAccount = async (id: string, password: string) => {
-  const user = await User.IsUserExistbyId(id);
-  const isPasswordMatched = await bcrypt.compare(password, user?.password);
-  if (!isPasswordMatched) {
-    throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Password does not match!');
-  }
-  const result = await User.findByIdAndUpdate(
-    id,
-    {
-      $set: {
-        isDeleted: true,
-      },
-    },
-    {
-      new: true,
-    },
-  );
-  return result;
-};
-
-const updatePhoneNumber = async (id: string, payload: any) => {
-  const result = await User.findByIdAndUpdate(id, payload);
-  return result;
-};
-
-export const userServices = {
-  getme,
-  updateProfile,
-  getSingleUser,
-  deleteAccount,
-  updatePhoneNumber,
-  getAllUsers,
-  // signupuser,
-};
+// export const userServices = {
+//   getme,
+//   updateProfile,
+//   getSingleUser,
+//   deleteAccount,
+//   updatePhoneNumber,
+//   getAllUsers,
+//   // signupuser,
+// };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import bcrypt from 'bcrypt';
@@ -236,3 +241,111 @@ export const userServices = {
 //   updatePhoneNumber,
 //   signupuser,
 // };
+
+import bcrypt from 'bcrypt';
+import httpStatus from 'http-status';
+import AppError from '../../error/AppError';
+
+import { TUser } from './user.interface';
+import User from './user.model';
+
+const getme = async (id: string) => {
+  const result = await User.findById(id);
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  return {
+    email: result.email,
+    fullName: result.fullName,
+    countryCode: result.countryCode,
+    phoneNumber: result.phoneNumber,
+    image: result.image ?? {},
+  };
+};
+
+const updateProfile = async (id: string, payload: Partial<TUser>) => {
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (payload?.phoneNumber) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'phoneNumber is not allowed to update',
+    );
+  }
+
+  if (payload?.role) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'role is not allowed to update');
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+
+  return updatedUser;
+};
+
+const getAllUsers = async () => {
+  // Only return users who are not soft-deleted
+  const users = await User.find({ isDeleted: { $ne: true } });
+  return users;
+};
+
+const getSingleUser = async (id: string) => {
+  const result = await User.findById(id);
+
+  if (!result || result.isDeleted) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  return result;
+};
+
+const deleteAccount = async (id: string, password: string) => {
+  const user = await User.IsUserExistbyId(id);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const isPasswordMatched = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Password does not match!');
+  }
+
+  const result = await User.findByIdAndUpdate(
+    id,
+    { $set: { isDeleted: true } },
+    { new: true },
+  );
+
+  return result;
+};
+
+const updatePhoneNumber = async (id: string, payload: Partial<TUser>) => {
+  const allowedPayload = {
+    phoneNumber: payload.phoneNumber,
+    countryCode: payload.countryCode,
+  };
+
+  const result = await User.findByIdAndUpdate(id, allowedPayload, {
+    new: true,
+  });
+
+  return result;
+};
+
+export const userServices = {
+  getme,
+  updateProfile,
+  getSingleUser,
+  deleteAccount,
+  updatePhoneNumber,
+  getAllUsers,
+};
