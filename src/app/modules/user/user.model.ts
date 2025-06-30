@@ -23,7 +23,7 @@ const VerificationSchema = new Schema({
 });
 const imageSchema = new Schema({
   id: {
-    type: Number, // Allows string or number
+    type: String, // Allows string or number
     required: true,
   },
   url: {
