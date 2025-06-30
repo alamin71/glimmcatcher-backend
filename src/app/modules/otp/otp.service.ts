@@ -274,6 +274,7 @@ const initiateSignup = async (payload: {
   password: string;
   phoneNumber: string;
   countryCode?: string;
+  gender: 'Male' | 'Female';
 }) => {
   // Check if user already exists
   const existingUser = await User.findOne({ email: payload.email });
@@ -349,6 +350,7 @@ const verifySignupOtp = async (token: string, otp: string | number) => {
     password: decoded.password, // raw password, let pre-save hook hash it
     phoneNumber: decoded.phoneNumber,
     countryCode: decoded.countryCode,
+    gender: decoded.gender,
     isVerified: true,
     role: 'user',
   });
