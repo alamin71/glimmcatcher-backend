@@ -10,9 +10,18 @@ import { authValidation } from '../auth/auth.validation';
 
 const router = Router();
 
+// For login user (user & admin both)
 router.patch(
   '/update-profile',
-  auth(USER_ROLE.user, USER_ROLE.admin),
+  auth(USER_ROLE.user, USER_ROLE.admin, USER_ROLE.sup_admin),
+  upload.single('file'),
+  userControllers.updateProfile,
+);
+
+// For admin to update others
+router.patch(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   upload.single('file'),
   userControllers.updateProfile,
 );
@@ -37,14 +46,6 @@ router.get(
   '/',
   auth(USER_ROLE.vendor, USER_ROLE.admin),
   userControllers.getAllUsers,
-);
-
-router.patch(
-  '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.sup_admin), // sudhu admin/super admin er access
-  parseData(),
-  upload.single('file'), // jodi file thake
-  userControllers.updateProfile,
 );
 
 router.delete(
