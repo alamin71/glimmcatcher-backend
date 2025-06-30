@@ -17,9 +17,9 @@ export default {
   socket_port: process.env.SOCKET_PORT,
   stripe_secret: process.env.STRIPE_SECRET,
   aws: {
-    region: process.env.region,
-    accessKeyId: process.env.accessKeyId,
-    secretAccessKey: process.env.secretAccessKey,
+    region: process.env.AWS_REGION,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     bucket: process.env.AWS_BUCKET_NAME,
   },
 };

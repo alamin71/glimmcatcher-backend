@@ -265,24 +265,47 @@ const getme = async (id: string) => {
   };
 };
 
+// const updateProfile = async (id: string, payload: Partial<TUser>) => {
+//   const user = await User.findById(id);
+
+//   if (!user) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+//   }
+
+//   if (payload?.phoneNumber) {
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'phoneNumber is not allowed to update',
+//     );
+//   }
+
+//   if (payload?.role) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'role is not allowed to update');
+//   }
+
+//   const updatedUser = await User.findByIdAndUpdate(id, payload, {
+//     new: true,
+//   });
+
+//   return updatedUser;
+// };
 const updateProfile = async (id: string, payload: Partial<TUser>) => {
   const user = await User.findById(id);
-
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  if (payload?.phoneNumber) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'phoneNumber is not allowed to update',
-    );
-  }
+  const restrictedFields = ['phoneNumber', 'role', 'email'];
+  restrictedFields.forEach((field) => {
+    if (field in payload) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        `${field} is not allowed to update`,
+      );
+    }
+  });
 
-  if (payload?.role) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'role is not allowed to update');
-  }
-
+  // Allow updating image, fullName, gender
   const updatedUser = await User.findByIdAndUpdate(id, payload, {
     new: true,
   });
