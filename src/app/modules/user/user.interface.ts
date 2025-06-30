@@ -32,7 +32,7 @@ export interface TUser {
   password: string;
   name: string;
   phoneNumber: string;
-  gender?: Gender;
+  gender: Gender;
   image: image;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;

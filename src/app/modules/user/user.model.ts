@@ -88,7 +88,7 @@ const UserSchema = new Schema<TUser, UserModel>(
     gender: {
       type: String,
       enum: ['Male', 'Female'],
-      required: false,
+      required: true,
     },
 
     isActive: {
