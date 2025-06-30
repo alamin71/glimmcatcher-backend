@@ -224,7 +224,7 @@ const auth = (...userRoles: string[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
 
-    req.user = { userId: id, role };
+    req.user = { id, role };
     next();
   });
 };
