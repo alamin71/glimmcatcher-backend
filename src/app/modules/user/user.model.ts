@@ -85,6 +85,11 @@ const UserSchema = new Schema<TUser, UserModel>(
       required: true,
       default: UserRole.customer, // ✅ Fix: Add default
     },
+    gender: {
+      type: String,
+      enum: ['Male', 'Female'],
+      required: false,
+    },
 
     isActive: {
       type: Boolean,
