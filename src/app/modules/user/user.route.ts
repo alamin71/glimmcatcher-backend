@@ -12,7 +12,7 @@ const router = Router();
 
 router.patch(
   '/update-profile',
-  auth(USER_ROLE.user),
+  auth(USER_ROLE.user, USER_ROLE.admin),
   upload.single('file'),
   userControllers.updateProfile,
 );
@@ -41,11 +41,12 @@ router.get(
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.user),
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin), // sudhu admin/super admin er access
   parseData(),
-  auth(USER_ROLE.sup_admin, USER_ROLE.admin),
+  upload.single('file'), // jodi file thake
   userControllers.updateProfile,
 );
+
 router.delete(
   '/',
   auth(USER_ROLE.user, USER_ROLE.sup_admin, USER_ROLE.admin),
