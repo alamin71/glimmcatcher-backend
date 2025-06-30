@@ -12,7 +12,7 @@ const router = Router();
 
 router.patch(
   '/update-profile',
-  auth(USER_ROLE.user, USER_ROLE.admin),
+  auth(USER_ROLE.user),
   upload.single('file'),
   userControllers.updateProfile,
 );
