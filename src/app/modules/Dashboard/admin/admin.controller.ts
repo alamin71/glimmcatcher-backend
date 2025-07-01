@@ -205,10 +205,29 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// const verifyOtp = catchAsync(async (req: Request, res: Response) => {
+//   const { otp } = req.body;
+
+//   // Match OTP against all temporary entries (demo approach)
+//   const matchedEmail = [...verifiedAdmins.entries()].find(
+//     ([email, storedOtp]) => storedOtp === otp.toString(),
+//   )?.[0];
+
+//   if (!matchedEmail) throw new AppError(400, 'OTP mismatch or expired');
+
+//   await adminService.verifyOtp(matchedEmail, otp);
+//   verifiedAdmins.set(matchedEmail, 'VERIFIED');
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'OTP verified, now you can reset password',
+//     data: {},
+//   });
+// });
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
   const { otp } = req.body;
 
-  // Match OTP against all temporary entries (demo approach)
   const matchedEmail = [...verifiedAdmins.entries()].find(
     ([email, storedOtp]) => storedOtp === otp.toString(),
   )?.[0];
@@ -216,13 +235,20 @@ const verifyOtp = catchAsync(async (req: Request, res: Response) => {
   if (!matchedEmail) throw new AppError(400, 'OTP mismatch or expired');
 
   await adminService.verifyOtp(matchedEmail, otp);
-  verifiedAdmins.set(matchedEmail, 'VERIFIED');
+  verifiedAdmins.delete(matchedEmail);
+
+  // 🔐 Use JWT_ACCESS_SECRET instead of reset secret
+  const token = jwt.sign(
+    { email: matchedEmail },
+    config.jwt_access_secret as string, // ✅ use existing secret
+    { expiresIn: '15m' },
+  );
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'OTP verified, now you can reset password',
-    data: {},
+    message: 'OTP verified. Use this token to reset password.',
+    data: { token },
   });
 });
 
