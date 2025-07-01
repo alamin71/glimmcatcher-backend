@@ -192,16 +192,17 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 // Store verified email temporarily in memory or use Redis/cache in real project
 const verifiedAdmins = new Map<string, string>();
 
+// global in-memory Map (for demo only)
+const otpStore = new Map<string, string>();
+
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const otp = await adminService.setForgotOtp(req.body.email);
-  // Store email temporarily with OTP (for demo only)
-  verifiedAdmins.set(req.body.email, otp.toString());
-
+  otpStore.set(otp.toString(), req.body.email); // ✅ store otp → email
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'OTP sent successfully, please verify before reset password',
-    data: { otp }, // Don't expose OTP in production
+    data: { otp }, // ❌ remove this in production
   });
 });
 
@@ -228,21 +229,17 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
   const { otp } = req.body;
 
-  const matchedEmail = [...verifiedAdmins.entries()].find(
-    ([email, storedOtp]) => storedOtp === otp.toString(),
-  )?.[0];
+  const email = otpStore.get(otp.toString());
+  if (!email) {
+    throw new AppError(400, 'OTP mismatch or expired');
+  }
 
-  if (!matchedEmail) throw new AppError(400, 'OTP mismatch or expired');
+  await adminService.verifyOtp(email, otp);
+  otpStore.delete(otp.toString()); // optional cleanup
 
-  await adminService.verifyOtp(matchedEmail, otp);
-  verifiedAdmins.delete(matchedEmail);
-
-  // 🔐 Use JWT_ACCESS_SECRET instead of reset secret
-  const token = jwt.sign(
-    { email: matchedEmail },
-    config.jwt_access_secret as string, // ✅ use existing secret
-    { expiresIn: '15m' },
-  );
+  const token = jwt.sign({ email }, config.jwt_access_secret as string, {
+    expiresIn: '15m',
+  });
 
   sendResponse(res, {
     statusCode: 200,
