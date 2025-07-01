@@ -160,28 +160,88 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+//   const otp = await adminService.setForgotOtp(req.body.email);
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'OTP sent successfully , please verify otp before reset password',
+//     data: { otp },
+//   });
+// });
+
+// const verifyOtp = catchAsync(async (req: Request, res: Response) => {
+//   await adminService.verifyOtp(req.body.email, req.body.otp);
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'OTP verified , now you can reset password',
+//     data: {},
+//   });
+// });
+
+// const resetPassword = catchAsync(async (req: Request, res: Response) => {
+//   await adminService.resetPassword(req.body.email, req.body.newPassword);
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Password reset successful',
+//     data: {},
+//   });
+// });
+// Store verified email temporarily in memory or use Redis/cache in real project
+const verifiedAdmins = new Map<string, string>();
+
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const otp = await adminService.setForgotOtp(req.body.email);
+  // Store email temporarily with OTP (for demo only)
+  verifiedAdmins.set(req.body.email, otp.toString());
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'OTP sent successfully',
-    data: { otp },
+    message: 'OTP sent successfully, please verify before reset password',
+    data: {}, // Don't expose OTP in production
   });
 });
 
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
-  await adminService.verifyOtp(req.body.email, req.body.otp);
+  const { otp } = req.body;
+
+  // Match OTP against all temporary entries (demo approach)
+  const matchedEmail = [...verifiedAdmins.entries()].find(
+    ([email, storedOtp]) => storedOtp === otp.toString(),
+  )?.[0];
+
+  if (!matchedEmail) throw new AppError(400, 'OTP mismatch or expired');
+
+  await adminService.verifyOtp(matchedEmail, otp);
+  verifiedAdmins.set(matchedEmail, 'VERIFIED');
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'OTP verified',
+    message: 'OTP verified, now you can reset password',
     data: {},
   });
 });
 
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
-  await adminService.resetPassword(req.body.email, req.body.newPassword);
+  const { newPassword, confirmPassword } = req.body;
+
+  if (newPassword !== confirmPassword)
+    throw new AppError(400, 'Passwords do not match');
+
+  // Find verified email
+  const matchedEmail = [...verifiedAdmins.entries()].find(
+    ([email, status]) => status === 'VERIFIED',
+  )?.[0];
+
+  if (!matchedEmail) throw new AppError(400, 'OTP not verified');
+
+  await adminService.resetPassword(matchedEmail, newPassword);
+  verifiedAdmins.delete(matchedEmail); // Clean up
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
