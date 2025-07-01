@@ -201,7 +201,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: 'OTP sent successfully, please verify before reset password',
-    data: {}, // Don't expose OTP in production
+    data: { otp }, // Don't expose OTP in production
   });
 });
 
