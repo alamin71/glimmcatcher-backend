@@ -1,89 +1,3 @@
-// // src/app/modules/Dashboard/admin/admin.controller.ts
-// import { Request, Response } from 'express';
-// import catchAsync from '../../../utils/catchAsync';
-// import httpStatus from 'http-status';
-// import jwt from 'jsonwebtoken';
-// import { Admin } from '../admin/admin.model';
-// import config from '../../../config';
-// import AppError from '../../../error/AppError';
-// import sendResponse from '../../../utils/sendResponse';
-
-// const adminLogin = catchAsync(async (req: Request, res: Response) => {
-//   const { email, password } = req.body;
-
-//   const admin = await Admin.findOne({ email }).select('+password');
-//   if (!admin) throw new AppError(httpStatus.NOT_FOUND, 'Admin not found');
-
-//   const isMatch = await admin.isPasswordMatched(password);
-//   if (!isMatch)
-//     throw new AppError(httpStatus.UNAUTHORIZED, 'Incorrect password');
-
-//   const token = jwt.sign(
-//     { id: admin._id, role: admin.role },
-//     config.jwt_access_secret as string,
-//     { expiresIn: config.jwt_access_expires_in },
-//   );
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Admin login successful',
-//     data: {
-//       admin,
-//       token,
-//     },
-//   });
-// });
-
-// export const adminControllers = {
-//   adminLogin,
-// };
-// src/app/modules/Dashboard/admin/admin.controller.ts
-// import { Request, Response } from 'express';
-// import catchAsync from '../../../utils/catchAsync';
-// import httpStatus from 'http-status';
-// import jwt from 'jsonwebtoken';
-// import { Admin } from '../admin/admin.model';
-// import config from '../../../config';
-// import AppError from '../../../error/AppError';
-// import sendResponse from '../../../utils/sendResponse';
-
-// const adminLogin = catchAsync(async (req: Request, res: Response) => {
-//   const { email, password } = req.body;
-
-//   const admin = await Admin.findOne({ email }).select('+password');
-//   if (!admin) throw new AppError(httpStatus.NOT_FOUND, 'Admin not found');
-
-//   const isMatch = await admin.isPasswordMatched(password);
-//   if (!isMatch)
-//     throw new AppError(httpStatus.UNAUTHORIZED, 'Incorrect password');
-
-//   const token = jwt.sign(
-//     { id: admin._id, role: admin.role },
-//     config.jwt_access_secret as string,
-//     { expiresIn: config.jwt_access_expires_in },
-//   );
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Admin login successful',
-//     data: {
-//       admin: {
-//         id: admin._id,
-//         email: admin.email,
-//         role: admin.role,
-//       },
-//       token,
-//     },
-//   });
-// });
-
-// export const adminControllers = {
-//   adminLogin,
-// };
-// ✅ admin.controller.ts
-
 import { Request, Response } from 'express';
 import catchAsync from '../../../utils/catchAsync';
 import sendResponse from '../../../utils/sendResponse';
@@ -160,36 +74,6 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const forgotPassword = catchAsync(async (req: Request, res: Response) => {
-//   const otp = await adminService.setForgotOtp(req.body.email);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'OTP sent successfully , please verify otp before reset password',
-//     data: { otp },
-//   });
-// });
-
-// const verifyOtp = catchAsync(async (req: Request, res: Response) => {
-//   await adminService.verifyOtp(req.body.email, req.body.otp);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'OTP verified , now you can reset password',
-//     data: {},
-//   });
-// });
-
-// const resetPassword = catchAsync(async (req: Request, res: Response) => {
-//   await adminService.resetPassword(req.body.email, req.body.newPassword);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Password reset successful',
-//     data: {},
-//   });
-// });
-// Store verified email temporarily in memory or use Redis/cache in real project
 const verifiedAdmins = new Map<string, string>();
 
 // global in-memory Map (for demo only)
@@ -202,30 +86,10 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: 'OTP sent successfully, please verify before reset password',
-    data: { otp }, // ❌ remove this in production
+    data: { otp },
   });
 });
 
-// const verifyOtp = catchAsync(async (req: Request, res: Response) => {
-//   const { otp } = req.body;
-
-//   // Match OTP against all temporary entries (demo approach)
-//   const matchedEmail = [...verifiedAdmins.entries()].find(
-//     ([email, storedOtp]) => storedOtp === otp.toString(),
-//   )?.[0];
-
-//   if (!matchedEmail) throw new AppError(400, 'OTP mismatch or expired');
-
-//   await adminService.verifyOtp(matchedEmail, otp);
-//   verifiedAdmins.set(matchedEmail, 'VERIFIED');
-
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'OTP verified, now you can reset password',
-//     data: {},
-//   });
-// });
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
   const { otp } = req.body;
 
