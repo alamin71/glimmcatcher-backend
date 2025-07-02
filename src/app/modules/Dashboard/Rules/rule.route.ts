@@ -25,7 +25,7 @@ router.post(
 );
 //get privacy
 router.get(
-  '/get-privacy',
+  '/get-privacy-policy',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.getPrivacyPolicy,
 );
