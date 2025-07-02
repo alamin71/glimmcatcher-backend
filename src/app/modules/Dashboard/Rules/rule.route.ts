@@ -6,39 +6,39 @@ const router = Router();
 
 //about us
 router.post(
-  '/about',
+  '/create-about',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.createAbout,
 );
 
 router.get(
-  '/get-about',
+  '/about',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.getAbout,
 );
 
 //privacy policy
 router.post(
-  '/privacy-policy',
+  '/create-privacy-policy',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.createPrivacyPolicy,
 );
 //get privacy
 router.get(
-  '/get-privacy-policy',
+  '/privacy-policy',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.getPrivacyPolicy,
 );
 
 //terms and conditions
 router.post(
-  '/terms-and-conditions',
+  '/create-terms-and-conditions',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.createTermsAndCondition,
 );
 //get terms and conditions
 router.get(
-  '/get-terms-and-condition',
+  '/terms-and-condition',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.getTermsAndCondition,
 );
