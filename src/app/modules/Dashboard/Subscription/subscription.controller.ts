@@ -26,6 +26,16 @@ const getAllSubscriptions = catchAsync(async (_req: Request, res: Response) => {
 
 const updateSubscription = catchAsync(async (req: Request, res: Response) => {
   const result = await SubscriptionService.update(req.params.id, req.body);
+
+  if (!result) {
+    return sendResponse(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Subscription not found',
+      data: null,
+    });
+  }
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
@@ -36,6 +46,16 @@ const updateSubscription = catchAsync(async (req: Request, res: Response) => {
 
 const deleteSubscription = catchAsync(async (req: Request, res: Response) => {
   const result = await SubscriptionService.delete(req.params.id);
+
+  if (!result) {
+    return sendResponse(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Subscription not found or already deleted',
+      data: null,
+    });
+  }
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
