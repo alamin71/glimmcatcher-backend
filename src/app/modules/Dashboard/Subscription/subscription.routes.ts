@@ -10,14 +10,14 @@ router.post(
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   SubscriptionController.createSubscription,
 );
-router.get('/subscription', SubscriptionController.getAllSubscriptions);
+router.get('/', SubscriptionController.getAllSubscriptions);
 router.patch(
   '/:id',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   SubscriptionController.updateSubscription,
 );
 router.delete(
-  '/subscription/:id',
+  '/:id',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   SubscriptionController.deleteSubscription,
 );

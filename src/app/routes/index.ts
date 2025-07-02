@@ -6,6 +6,7 @@ import { userRoutes } from '../modules/user/user.route';
 import walletRoutes from '../modules/wallet/wallet.route';
 import { adminRoutes } from '../modules/Dashboard/admin/admin.route';
 import { ruleRoutes } from '../modules/Dashboard/Rules/rule.route';
+import { SubscriptionRoutes } from '../modules/Dashboard/Subscription/subscription.routes';
 
 const router = Router();
 const moduleRoutes = [
@@ -25,6 +26,10 @@ const moduleRoutes = [
   {
     path: '/rules',
     route: ruleRoutes,
+  },
+  {
+    path: '/subscription',
+    route: SubscriptionRoutes,
   },
   {
     path: '/otp',
