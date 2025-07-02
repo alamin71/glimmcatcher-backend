@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { USER_ROLE } from '../../user/user.constant';
 import { RuleController } from './rule.controller';
 import auth from '../../../middleware/auth';
+import { RuleValidation } from '../../Dashboard/Rules/rule.validation';
+
 const router = Router();
 
 //about us
@@ -42,4 +44,12 @@ router.get(
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   RuleController.getTermsAndCondition,
 );
+
+//rule update
+router.patch(
+  '/update',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.updateRuleContent,
+);
+
 export const ruleRoutes = router;

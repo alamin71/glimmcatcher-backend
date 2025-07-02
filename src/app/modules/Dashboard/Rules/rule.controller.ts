@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../utils/catchAsync';
 import sendResponse from '../../../utils/sendResponse';
 import { RuleService } from './rule.service';
+import AppError from '../../../error/AppError';
 
 //privacy policy
 const createPrivacyPolicy = catchAsync(async (req: Request, res: Response) => {
@@ -77,6 +78,26 @@ const getAbout = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+//update rule
+const updateRuleContent = catchAsync(async (req: Request, res: Response) => {
+  const { type, content } = req.body;
+
+  if (!type || !content) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'type and content are required',
+    );
+  }
+
+  const updated = await RuleService.updateRuleContentToDB(type, content);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: `${type} updated successfully`,
+    data: updated,
+  });
+});
 
 export const RuleController = {
   createPrivacyPolicy,
@@ -85,4 +106,5 @@ export const RuleController = {
   getTermsAndCondition,
   createAbout,
   getAbout,
+  updateRuleContent,
 };

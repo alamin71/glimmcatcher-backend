@@ -90,6 +90,26 @@ const getAboutFromDB = async () => {
   }
   return result;
 };
+//update rule
+const updateRuleContentToDB = async (
+  type: 'privacy' | 'terms' | 'about',
+  content: string,
+) => {
+  const updated = await Rule.findOneAndUpdate(
+    { type },
+    { content },
+    { new: true },
+  );
+
+  if (!updated) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      `${type} content not found to update`,
+    );
+  }
+
+  return updated;
+};
 
 export const RuleService = {
   createPrivacyPolicyToDB,
@@ -98,4 +118,5 @@ export const RuleService = {
   getTermsAndConditionFromDB,
   createAboutToDB,
   getAboutFromDB,
+  updateRuleContentToDB,
 };
