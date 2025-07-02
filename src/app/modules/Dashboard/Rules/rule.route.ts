@@ -39,11 +39,7 @@ router.post(
   RuleController.createTermsAndCondition,
 );
 //get terms and conditions
-router.get(
-  '/terms-and-condition',
-  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
-  RuleController.getTermsAndCondition,
-);
+router.get('/terms-and-condition', RuleController.getTermsAndCondition);
 
 //rule update
 router.patch(

@@ -6,18 +6,18 @@ import { USER_ROLE } from '../../user/user.constant';
 const router = express.Router();
 
 router.post(
-  '/',
+  '/create-subscription',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   SubscriptionController.createSubscription,
 );
-router.get('/', SubscriptionController.getAllSubscriptions);
+router.get('/subscription', SubscriptionController.getAllSubscriptions);
 router.patch(
   '/:id',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   SubscriptionController.updateSubscription,
 );
 router.delete(
-  '/:id',
+  '/subscription/:id',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   SubscriptionController.deleteSubscription,
 );
