@@ -1,29 +1,45 @@
-import express from 'express';
+import { Router } from 'express';
 import { USER_ROLE } from '../../user/user.constant';
 import { RuleController } from './rule.controller';
 import auth from '../../../middleware/auth';
-const router = express.Router();
+const router = Router();
 
 //about us
-router
-  .route('/about')
-  .post(auth(USER_ROLE.admin, USER_ROLE.sup_admin), RuleController.createAbout)
-  .get(RuleController.getAbout);
+router.post(
+  '/about',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.createAbout,
+);
+
+router.get(
+  '/get-about',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.getAbout,
+);
 
 //privacy policy
-router
-  .route('/privacy-policy')
-  .post(
-    auth(USER_ROLE.admin, USER_ROLE.sup_admin),
-    RuleController.createPrivacyPolicy,
-  )
-  .get(RuleController.getPrivacyPolicy);
+router.post(
+  '/privacy-policy',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.createPrivacyPolicy,
+);
+//get privacy
+router.get(
+  '/get-privacy',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.getPrivacyPolicy,
+);
 
 //terms and conditions
-router
-  .route('/terms-and-conditions')
-  .post(
-    auth(USER_ROLE.admin, USER_ROLE.sup_admin),
-    RuleController.createTermsAndCondition,
-  )
-  .get(RuleController.getTermsAndCondition);
+router.post(
+  '/terms-and-conditions',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.createTermsAndCondition,
+);
+//get terms and conditions
+router.get(
+  '/get-terms-and-condition',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  RuleController.getTermsAndCondition,
+);
+export const ruleRoutes = router;
