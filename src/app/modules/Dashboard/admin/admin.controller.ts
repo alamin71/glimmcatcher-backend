@@ -236,6 +236,7 @@ const verifyOtp = catchAsync(async (req: Request, res: Response) => {
 
   await adminService.verifyOtp(email, otp);
   otpStore.delete(otp.toString()); // optional cleanup
+  verifiedAdmins.set(email, 'VERIFIED');
 
   const token = jwt.sign({ email }, config.jwt_access_secret as string, {
     expiresIn: '15m',
