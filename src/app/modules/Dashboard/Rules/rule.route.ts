@@ -13,11 +13,7 @@ router.post(
   RuleController.createAbout,
 );
 
-router.get(
-  '/about',
-  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
-  RuleController.getAbout,
-);
+router.get('/about', RuleController.getAbout);
 
 //privacy policy
 router.post(
@@ -26,11 +22,7 @@ router.post(
   RuleController.createPrivacyPolicy,
 );
 //get privacy
-router.get(
-  '/privacy-policy',
-  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
-  RuleController.getPrivacyPolicy,
-);
+router.get('/privacy-policy', RuleController.getPrivacyPolicy);
 
 //terms and conditions
 router.post(

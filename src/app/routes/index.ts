@@ -7,6 +7,7 @@ import walletRoutes from '../modules/wallet/wallet.route';
 import { adminRoutes } from '../modules/Dashboard/admin/admin.route';
 import { ruleRoutes } from '../modules/Dashboard/Rules/rule.route';
 import { SubscriptionRoutes } from '../modules/Dashboard/Subscription/subscription.routes';
+import { PaymentRoutes } from '../modules/Payments/payment.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -30,6 +31,10 @@ const moduleRoutes = [
   {
     path: '/subscription',
     route: SubscriptionRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoutes,
   },
   {
     path: '/otp',
