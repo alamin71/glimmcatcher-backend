@@ -167,7 +167,17 @@ const getMonthlyEarningsStats = catchAsync(
     });
   },
 );
+const getEarningsOverview = catchAsync(async (req: Request, res: Response) => {
+  const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+  const result = await PaymentService.get12MonthGrowthPercentage(year);
 
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: '12-month earnings overview fetched successfully',
+    data: result,
+  });
+});
 export const PaymentController = {
   createPaymentIntent,
   savePayment,
@@ -176,4 +186,5 @@ export const PaymentController = {
   getTotalEarnings,
   getTodaysEarnings,
   getMonthlyEarningsStats,
+  getEarningsOverview,
 };

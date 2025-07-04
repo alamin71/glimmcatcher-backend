@@ -248,6 +248,7 @@ import AppError from '../../error/AppError';
 
 import { TUser } from './user.interface';
 import User from './user.model';
+import { subMonths, startOfMonth } from 'date-fns';
 
 const getme = async (id: string) => {
   const result = await User.findById(id);
@@ -402,6 +403,66 @@ const getMonthlyUserStats = async () => {
     trend: percentageChange >= 0 ? 'up' : 'down',
   };
 };
+const getUsersLast12Months = async (year?: number) => {
+  const now = new Date();
+  const baseDate = year ? new Date(year, 11, 31) : now;
+  const start = startOfMonth(subMonths(baseDate, 11));
+
+  const users = await User.aggregate([
+    {
+      $match: {
+        isDeleted: { $ne: true },
+        createdAt: { $gte: start, $lte: baseDate },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+        total: { $sum: 1 },
+      },
+    },
+    {
+      $sort: {
+        '_id.year': 1,
+        '_id.month': 1,
+      },
+    },
+  ]);
+
+  const data: { month: string; total: number }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = subMonths(baseDate, i);
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+
+    const found = users.find(
+      (u) => u._id.year === year && u._id.month === date.getMonth() + 1,
+    );
+
+    data.push({ month, total: found?.total || 0 });
+  }
+
+  return data;
+};
+
+const getUserGrowthPercentage = async (year?: number) => {
+  const users = await getUsersLast12Months(year);
+  const first = users[0]?.total || 0;
+  const last = users[11]?.total || 0;
+
+  const difference = last - first;
+  const percentageChange =
+    first > 0 ? (difference / first) * 100 : last > 0 ? 100 : 0;
+
+  return {
+    users,
+    growthPercentage: parseFloat(percentageChange.toFixed(2)),
+    trend: percentageChange >= 0 ? 'up' : 'down',
+  };
+};
 
 export const userServices = {
   getme,
@@ -412,4 +473,6 @@ export const userServices = {
   getAllUsers,
   getTotalUsersCount,
   getMonthlyUserStats,
+  getUsersLast12Months,
+  getUserGrowthPercentage,
 };

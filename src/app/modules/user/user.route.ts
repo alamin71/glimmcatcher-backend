@@ -28,6 +28,11 @@ router.get(
   auth(USER_ROLE.admin),
   userControllers.getMonthlyUserStats,
 );
+router.get(
+  '/user-growth-overview',
+  auth(USER_ROLE.admin),
+  userControllers.getUserGrowthOverview,
+);
 
 // For admin to update others
 router.patch(

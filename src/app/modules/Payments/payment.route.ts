@@ -32,6 +32,11 @@ router.get(
   auth(USER_ROLE.admin),
   PaymentController.getMonthlyEarningsStats,
 );
+router.get(
+  '/earnings-overview',
+  auth(USER_ROLE.admin),
+  PaymentController.getEarningsOverview,
+);
 
 router.get(
   '/todays-earnings',

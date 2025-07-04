@@ -1,5 +1,6 @@
 import { Payment } from './payment.model';
 import { IPayment } from './payment.interface';
+import { subMonths, startOfMonth } from 'date-fns';
 
 const savePaymentDetails = async (payload: IPayment) => {
   const created = await Payment.create(payload);
@@ -106,6 +107,67 @@ const getMonthlyEarningsStats = async () => {
   };
 };
 
+const getEarningsLast12Months = async (year?: number) => {
+  const now = new Date();
+  const baseDate = year ? new Date(year, 11, 31) : now;
+  const start = startOfMonth(subMonths(baseDate, 11));
+
+  const earnings = await Payment.aggregate([
+    {
+      $match: {
+        status: 'succeeded',
+        paymentDate: { $gte: start, $lte: baseDate },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$paymentDate' },
+          month: { $month: '$paymentDate' },
+        },
+        total: { $sum: '$amount' },
+      },
+    },
+    {
+      $sort: {
+        '_id.year': 1,
+        '_id.month': 1,
+      },
+    },
+  ]);
+
+  const data: { month: string; total: number }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = subMonths(baseDate, i);
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+
+    const found = earnings.find(
+      (e) => e._id.year === year && e._id.month === date.getMonth() + 1,
+    );
+
+    data.push({ month, total: found?.total || 0 });
+  }
+
+  return data;
+};
+
+const get12MonthGrowthPercentage = async (year?: number) => {
+  const earnings = await getEarningsLast12Months(year);
+  const first = earnings[0]?.total || 0;
+  const last = earnings[11]?.total || 0;
+
+  const difference = last - first;
+  const percentageChange =
+    first > 0 ? (difference / first) * 100 : last > 0 ? 100 : 0;
+
+  return {
+    earnings,
+    growthPercentage: parseFloat(percentageChange.toFixed(2)),
+    trend: percentageChange >= 0 ? 'up' : 'down',
+  };
+};
+
 export const PaymentService = {
   savePaymentDetails,
   getSinglePayment,
@@ -113,4 +175,6 @@ export const PaymentService = {
   getTotalEarnings,
   getTodaysEarnings,
   getMonthlyEarningsStats,
+  getEarningsLast12Months,
+  get12MonthGrowthPercentage,
 };

@@ -247,6 +247,21 @@ const getMonthlyUserStats = catchAsync(async (_req: Request, res: Response) => {
     data: result,
   });
 });
+const getUserGrowthOverview = catchAsync(
+  async (req: Request, res: Response) => {
+    const year = req.query.year
+      ? parseInt(req.query.year as string)
+      : undefined;
+    const result = await userServices.getUserGrowthPercentage(year);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: '12-month user growth fetched successfully',
+      data: result,
+    });
+  },
+);
 
 export const userControllers = {
   getme,
@@ -257,4 +272,5 @@ export const userControllers = {
   updatePhoneNumber,
   getTotalUsersCount,
   getMonthlyUserStats,
+  getUserGrowthOverview,
 };
