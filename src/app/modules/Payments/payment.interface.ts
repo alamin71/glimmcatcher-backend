@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
+import { TUser } from '../user/user.interface';
 
 export interface IPayment {
-  user: Types.ObjectId;
+  user: Types.ObjectId | TUser;
   subscriptionId: Types.ObjectId;
   amount: number;
   transactionId: string;

@@ -16,5 +16,10 @@ router.post(
   auth(USER_ROLE.user),
   PaymentController.savePayment,
 );
+router.get(
+  '/',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  PaymentController.getAllPayments,
+);
 
 export const PaymentRoutes = router;
