@@ -213,8 +213,51 @@ const getAllPayments = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getSinglePayment = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await PaymentService.getSinglePayment(id);
+
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Payment not found');
+  }
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Payment retrieved successfully',
+    data: result,
+  });
+});
+// ✅ Total Earnings from service
+const getTotalEarnings = catchAsync(async (req: Request, res: Response) => {
+  const total = await PaymentService.getTotalEarnings();
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Total earnings fetched successfully',
+    data: total,
+  });
+});
+
+// ✅ Today's Earnings from service
+const getTodaysEarnings = catchAsync(async (req: Request, res: Response) => {
+  const total = await PaymentService.getTodaysEarnings();
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Today's earnings fetched successfully",
+    data: total,
+  });
+});
+
 export const PaymentController = {
   createPaymentIntent,
   savePayment,
   getAllPayments,
+  getSinglePayment,
+  getTotalEarnings,
+  getTodaysEarnings,
 };

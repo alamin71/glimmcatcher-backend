@@ -21,5 +21,21 @@ router.get(
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   PaymentController.getAllPayments,
 );
+router.get(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  PaymentController.getSinglePayment,
+);
+
+router.get(
+  '/total-earnings',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  PaymentController.getTotalEarnings,
+);
+router.get(
+  '/todays-earnings',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  PaymentController.getTodaysEarnings,
+);
 
 export const PaymentRoutes = router;
