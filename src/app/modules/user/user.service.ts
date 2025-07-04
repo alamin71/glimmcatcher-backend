@@ -363,6 +363,10 @@ const updatePhoneNumber = async (id: string, payload: Partial<TUser>) => {
 
   return result;
 };
+const getTotalUsersCount = async () => {
+  const count = await User.countDocuments({ isDeleted: { $ne: true } });
+  return count;
+};
 
 export const userServices = {
   getme,
@@ -371,4 +375,5 @@ export const userServices = {
   deleteAccount,
   updatePhoneNumber,
   getAllUsers,
+  getTotalUsersCount,
 };

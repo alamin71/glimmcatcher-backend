@@ -229,6 +229,15 @@ const deleteAccount = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getTotalUsersCount = catchAsync(async (_req: Request, res: Response) => {
+  const count = await userServices.getTotalUsersCount();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Total users count fetched successfully',
+    data: count,
+  });
+});
 
 export const userControllers = {
   getme,
@@ -237,4 +246,5 @@ export const userControllers = {
   getAllUsers,
   deleteAccount,
   updatePhoneNumber,
+  getTotalUsersCount,
 };

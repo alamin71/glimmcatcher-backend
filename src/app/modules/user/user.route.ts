@@ -17,6 +17,12 @@ router.patch(
   upload.single('file'),
   userControllers.updateProfile,
 );
+//toatal user count
+router.get(
+  '/total-count',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  userControllers.getTotalUsersCount,
+);
 
 // For admin to update others
 router.patch(
