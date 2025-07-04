@@ -1,9 +1,9 @@
-import express from 'express';
+import { Router } from 'express';
 import { PaymentController } from './payment.controller';
 import auth from '../../middleware/auth';
 import { USER_ROLE } from '../user/user.constant';
 
-const router = express.Router();
+const router = Router();
 
 router.post(
   '/create-payment-intent',
