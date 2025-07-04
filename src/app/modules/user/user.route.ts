@@ -23,6 +23,11 @@ router.get(
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   userControllers.getTotalUsersCount,
 );
+router.get(
+  '/monthly-user-stats',
+  auth(USER_ROLE.admin),
+  userControllers.getMonthlyUserStats,
+);
 
 // For admin to update others
 router.patch(

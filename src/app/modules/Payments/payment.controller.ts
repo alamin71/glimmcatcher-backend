@@ -156,6 +156,17 @@ const getTodaysEarnings = catchAsync(async (req: Request, res: Response) => {
     data: total,
   });
 });
+const getMonthlyEarningsStats = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await PaymentService.getMonthlyEarningsStats();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Monthly earnings stats fetched successfully',
+      data: result,
+    });
+  },
+);
 
 export const PaymentController = {
   createPaymentIntent,
@@ -164,4 +175,5 @@ export const PaymentController = {
   getSinglePayment,
   getTotalEarnings,
   getTodaysEarnings,
+  getMonthlyEarningsStats,
 };

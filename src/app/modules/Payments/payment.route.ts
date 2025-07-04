@@ -28,10 +28,17 @@ router.get(
   PaymentController.getTotalEarnings,
 );
 router.get(
+  '/monthly-earnings-stats',
+  auth(USER_ROLE.admin),
+  PaymentController.getMonthlyEarningsStats,
+);
+
+router.get(
   '/todays-earnings',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   PaymentController.getTodaysEarnings,
 );
+
 router.get(
   '/:id',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),

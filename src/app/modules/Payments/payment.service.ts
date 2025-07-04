@@ -44,6 +44,67 @@ const getTodaysEarnings = async (): Promise<number> => {
   ]);
   return result[0]?.total || 0;
 };
+const getMonthlyEarningsStats = async () => {
+  const startOfCurrentMonth = new Date();
+  startOfCurrentMonth.setDate(1);
+  startOfCurrentMonth.setHours(0, 0, 0, 0);
+
+  const startOfPreviousMonth = new Date(startOfCurrentMonth);
+  startOfPreviousMonth.setMonth(startOfPreviousMonth.getMonth() - 1);
+
+  const endOfPreviousMonth = new Date(startOfCurrentMonth);
+
+  const currentMonthEarningsResult = await Payment.aggregate([
+    {
+      $match: {
+        status: 'succeeded',
+        paymentDate: { $gte: startOfCurrentMonth },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$amount' },
+      },
+    },
+  ]);
+
+  const previousMonthEarningsResult = await Payment.aggregate([
+    {
+      $match: {
+        status: 'succeeded',
+        paymentDate: {
+          $gte: startOfPreviousMonth,
+          $lt: startOfCurrentMonth,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$amount' },
+      },
+    },
+  ]);
+
+  const currentEarnings = currentMonthEarningsResult[0]?.total || 0;
+  const previousEarnings = previousMonthEarningsResult[0]?.total || 0;
+
+  const difference = currentEarnings - previousEarnings;
+  const percentageChange =
+    previousEarnings > 0
+      ? (difference / previousEarnings) * 100
+      : currentEarnings > 0
+        ? 100
+        : 0;
+
+  return {
+    currentEarnings,
+    previousEarnings,
+    percentageChange: parseFloat(percentageChange.toFixed(2)),
+    trend: percentageChange >= 0 ? 'up' : 'down',
+  };
+};
 
 export const PaymentService = {
   savePaymentDetails,
@@ -51,4 +112,5 @@ export const PaymentService = {
   getAllPayments,
   getTotalEarnings,
   getTodaysEarnings,
+  getMonthlyEarningsStats,
 };

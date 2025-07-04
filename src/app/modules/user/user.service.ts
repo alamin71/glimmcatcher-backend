@@ -367,6 +367,41 @@ const getTotalUsersCount = async () => {
   const count = await User.countDocuments({ isDeleted: { $ne: true } });
   return count;
 };
+const getMonthlyUserStats = async () => {
+  const startOfCurrentMonth = new Date();
+  startOfCurrentMonth.setDate(1);
+  startOfCurrentMonth.setHours(0, 0, 0, 0);
+
+  const startOfPreviousMonth = new Date(startOfCurrentMonth);
+  startOfPreviousMonth.setMonth(startOfPreviousMonth.getMonth() - 1);
+
+  const endOfPreviousMonth = new Date(startOfCurrentMonth);
+
+  const currentMonthUsers = await User.countDocuments({
+    isDeleted: { $ne: true },
+    createdAt: { $gte: startOfCurrentMonth },
+  });
+
+  const previousMonthUsers = await User.countDocuments({
+    isDeleted: { $ne: true },
+    createdAt: { $gte: startOfPreviousMonth, $lt: startOfCurrentMonth },
+  });
+
+  const difference = currentMonthUsers - previousMonthUsers;
+  const percentageChange =
+    previousMonthUsers > 0
+      ? (difference / previousMonthUsers) * 100
+      : currentMonthUsers > 0
+        ? 100
+        : 0;
+
+  return {
+    currentCount: currentMonthUsers,
+    previousCount: previousMonthUsers,
+    percentageChange: parseFloat(percentageChange.toFixed(2)),
+    trend: percentageChange >= 0 ? 'up' : 'down',
+  };
+};
 
 export const userServices = {
   getme,
@@ -376,4 +411,5 @@ export const userServices = {
   updatePhoneNumber,
   getAllUsers,
   getTotalUsersCount,
+  getMonthlyUserStats,
 };

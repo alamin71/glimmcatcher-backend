@@ -238,6 +238,15 @@ const getTotalUsersCount = catchAsync(async (_req: Request, res: Response) => {
     data: count,
   });
 });
+const getMonthlyUserStats = catchAsync(async (_req: Request, res: Response) => {
+  const result = await userServices.getMonthlyUserStats();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Monthly user stats fetched successfully',
+    data: result,
+  });
+});
 
 export const userControllers = {
   getme,
@@ -247,4 +256,5 @@ export const userControllers = {
   deleteAccount,
   updatePhoneNumber,
   getTotalUsersCount,
+  getMonthlyUserStats,
 };
