@@ -17,7 +17,7 @@ router.post(
   PaymentController.savePayment,
 );
 router.get(
-  '/',
+  '/all',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   PaymentController.getAllPayments,
 );
