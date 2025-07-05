@@ -81,16 +81,27 @@ const insertAiImageToWallet = catchAsync(
     }
 
     const openaiImageUrl = await generateAIImage(prompt);
-    const s3ImageUrl = await uploadFromUrlToS3(
-      openaiImageUrl,
-      'wallet/aiImage/',
-    );
+    // const s3ImageUrl = await uploadFromUrlToS3(
+    //   openaiImageUrl,
+    //   'wallet/aiImage/',
+    // );
+
+    // const result = await walletService.insertAiImageToWallet({
+    //   user: userId,
+    //   type: 'ai_generate',
+    //   prompt,
+    //   aiGenerate: s3ImageUrl,
+    // });
+    const s3Image = await uploadFromUrlToS3(openaiImageUrl, 'wallet/aiImage/');
 
     const result = await walletService.insertAiImageToWallet({
       user: userId,
       type: 'ai_generate',
       prompt,
-      aiGenerate: s3ImageUrl,
+      aiGenerate: {
+        id: s3Image.id,
+        url: s3Image.url,
+      }, // ✅ Now passing object
     });
 
     sendResponse(res, {
@@ -100,7 +111,7 @@ const insertAiImageToWallet = catchAsync(
       data: {
         prompt,
         openaiImageUrl,
-        s3ImageUrl,
+        s3ImageUrl: s3Image.url,
         saved: result,
       },
     });
