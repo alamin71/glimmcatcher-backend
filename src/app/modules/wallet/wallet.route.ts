@@ -22,10 +22,9 @@ router.post(
 router.post(
   '/create-ai-images',
   auth(USER_ROLE.user),
-  upload.single('file'),
-  parseData(),
   walletController.insertAiImageToWallet,
 );
+
 router.post(
   '/insert-videos-or-images',
   auth(USER_ROLE.user),

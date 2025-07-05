@@ -3,6 +3,8 @@ import catchAsync from '../../utils/catchAsync';
 import { uploadManyToS3, uploadToS3 } from '../../utils/fileHelper';
 import sendResponse from '../../utils/sendResponse';
 import walletService from './wallet.service';
+import { generateAIImage } from '../../utils/aiImageGenerator';
+import { uploadFromUrlToS3 } from '../../utils/uploadFromUrlToS3';
 
 const insertTextToWallet = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
@@ -42,27 +44,69 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+// const insertAiImageToWallet = catchAsync(
+//   async (req: Request, res: Response) => {
+//     let image;
+//     if (req?.file) {
+//       image = await uploadToS3(req?.file, 'wallet/aiImage/');
+//     }
+//     const { userId } = req.user;
+//     const result = await walletService.insertAiImageToWallet({
+//       ...req.body,
+//       user: userId,
+//       type: 'ai_generate',
+//       aiGenerate: image,
+//     });
+//     sendResponse(res, {
+//       statusCode: 200,
+//       success: true,
+//       message: 'A successfully',
+//       data: result,
+//     });
+//   },
+// );
+
 const insertAiImageToWallet = catchAsync(
   async (req: Request, res: Response) => {
-    let image;
-    if (req?.file) {
-      image = await uploadToS3(req?.file, 'wallet/aiImage/');
-    }
+    const { prompt } = req.body;
     const { userId } = req.user;
+
+    if (!prompt) {
+      return sendResponse(res, {
+        statusCode: 400,
+        success: false,
+        message: 'Prompt is required',
+        data: null,
+      });
+    }
+
+    const openaiImageUrl = await generateAIImage(prompt);
+    const s3ImageUrl = await uploadFromUrlToS3(
+      openaiImageUrl,
+      'wallet/aiImage/',
+    );
+
     const result = await walletService.insertAiImageToWallet({
-      ...req.body,
       user: userId,
       type: 'ai_generate',
-      aiGenerate: image,
+      prompt,
+      aiGenerate: s3ImageUrl,
     });
+
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: 'A successfully',
-      data: result,
+      message: 'AI image generated and saved successfully',
+      data: {
+        prompt,
+        openaiImageUrl,
+        s3ImageUrl,
+        saved: result,
+      },
     });
   },
 );
+
 const insertVideosOrImagesToWallet = catchAsync(
   async (req: Request, res: Response) => {
     let images: { url: string; id: string }[] = [];
