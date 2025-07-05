@@ -23,7 +23,7 @@ export const uploadFromUrlToS3 = async (
     Key: fileName,
     Body: response.data,
     ContentType: 'image/png',
-    ACL: 'public-read',
+    // ACL: 'public-read',
   };
 
   await s3.upload(uploadParams).promise();
