@@ -276,12 +276,18 @@ const auth = (...userRoles: string[]) => {
     }
 
     // ✅ Attach full user data (id + email)
+    // req.user = {
+    //   _id: isExist._id,
+    //   email: isExist.email,
+    //   role: isExist.role,
+    // };
+
     req.user = {
-      _id: isExist._id,
+      userId: isExist._id,
+      _id: isExist._id, // 👈 Keeps backward compatibility
       email: isExist.email,
       role: isExist.role,
     };
-
     next();
   });
 };
