@@ -107,6 +107,48 @@ const insertAiImageToWallet = catchAsync(
   },
 );
 
+// const insertVideosOrImagesToWallet = catchAsync(
+//   async (req: Request, res: Response) => {
+//     let images: { url: string; id: string }[] = [];
+//     let videos: { url: string; id: string }[] = [];
+
+//     if (req?.files) {
+//       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+//       if (files?.images) {
+//         images = await uploadManyToS3(
+//           files.images.map((file) => ({
+//             file,
+//             path: 'wallet/images/',
+//           })),
+//         );
+//       }
+
+//       if (files?.videos) {
+//         videos = await uploadManyToS3(
+//           files.videos.map((file) => ({
+//             file,
+//             path: 'wallet/videos/',
+//           })),
+//         );
+//       }
+//     }
+
+//     const payload: any = {
+//       ...req.body,
+//       images,
+//       videos,
+//     };
+
+//     const result = await walletService.insertAiImageToWallet(payload);
+//     sendResponse(res, {
+//       statusCode: 200,
+//       success: true,
+//       message: 'Data inserted successfully',
+//       data: result,
+//     });
+//   },
+// );
 const insertVideosOrImagesToWallet = catchAsync(
   async (req: Request, res: Response) => {
     let images: { url: string; id: string }[] = [];
@@ -134,13 +176,20 @@ const insertVideosOrImagesToWallet = catchAsync(
       }
     }
 
+    const { userId } = req.user; // ✅ Get user ID from auth middleware
+
     const payload: any = {
-      ...req.body,
-      images,
-      videos,
+      user: userId, // ✅ REQUIRED
+      type: 'image_video', // ✅ REQUIRED, matches Mongoose schema
+      imageVideo: {
+        title: req.body.title,
+        description: req.body.description,
+        images,
+        videos,
+      },
     };
 
-    const result = await walletService.insertAiImageToWallet(payload);
+    const result = await walletService.insertAiImageToWallet(payload); // 🧠 You may want to rename this service to `insertImageVideoToWallet`
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -149,6 +198,7 @@ const insertVideosOrImagesToWallet = catchAsync(
     });
   },
 );
+
 const getMyWalletData = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
 
