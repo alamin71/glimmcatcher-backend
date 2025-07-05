@@ -1,5 +1,6 @@
 import QueryBuilder from '../../builder/QueryBuilder';
 import Wallet from './wallet.model';
+import AppError from '../../error/AppError';
 
 const insertTextToWallet = async (payload: any) => {
   const result = await Wallet.create(payload);
@@ -34,9 +35,16 @@ const getMyWalletData = async (query: Record<string, any>) => {
 };
 
 const deleteWalletData = async (id: string) => {
-  const result = await Wallet.findByIdAndUpdate({
-    isDeleted: true,
-  });
+  const result = await Wallet.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
+
+  if (!result) {
+    throw new AppError(404, 'Wallet data not found');
+  }
+
   return result;
 };
 
