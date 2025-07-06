@@ -107,6 +107,8 @@ import catchAsync from '../../utils/catchAsync';
 import { uploadToS3 } from '../../utils/fileHelper';
 import sendResponse from '../../utils/sendResponse';
 import { userServices } from './user.service';
+import { io } from '../../../server';
+import { sendUserNotification } from '../../../socketIo';
 
 // Get current user's profile
 const getme = catchAsync(async (req: Request, res: Response) => {
@@ -177,7 +179,12 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
   // Call the service to update
   const result = await userServices.updateProfile(userIdToUpdate, updateData);
-
+  // Send notification to user
+  sendUserNotification(io, userIdToUpdate, {
+    title: 'Profile Updated',
+    message: 'Your profile has been updated successfully.',
+    type: 'profile',
+  });
   // Respond with updated user info and context
   sendResponse(res, {
     statusCode: 200,

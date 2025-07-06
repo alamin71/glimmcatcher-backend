@@ -1,34 +1,29 @@
-import { Server, createServer } from 'http';
+import { Server } from 'http';
 import mongoose from 'mongoose';
 import app from './app';
 import config from './app/config';
-// import initializeSocketIO from './socketIo';
+import initializeSocketIO from './socketIo';
+
 let server: Server;
-// export const io = initializeSocketIO(createServer(app));
+export let io: any; // Export io for use in other files
 
 async function main() {
   try {
     await mongoose.connect(config.database_url as string);
 
-    // server = app.listen(Number(config.port), config.ip as string, () => {
-    //   console.log(`app is listening on port ${config.port}`);
-    // });
-
-    // for both local and Render
     const port = Number(config.port) || 5000;
 
     if (config.NODE_ENV === 'production') {
       server = app.listen(port, () => {
         console.log(`App is listening on port ${port}`);
+        io = initializeSocketIO(server); // assign and export io
       });
     } else {
       server = app.listen(port, config.ip as string, () => {
         console.log(`App is listening on ${config.ip}:${port}`);
+        io = initializeSocketIO(server); // assign and export io
       });
     }
-
-    // io.listen(Number(config.socket_port));
-    console.log(`Socket is listening on port ${config.socket_port}`);
   } catch (err) {
     console.log(err);
   }

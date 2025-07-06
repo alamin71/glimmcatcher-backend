@@ -3,9 +3,19 @@ import catchAsync from '../../../utils/catchAsync';
 import sendResponse from '../../../utils/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import { SubscriptionService } from './subscription.service';
+import { io } from '../../../../server';
+import { sendAdminNotification } from '../../../../socketIo';
 
 const createSubscription = catchAsync(async (req: Request, res: Response) => {
   const result = await SubscriptionService.create(req.body);
+
+  // Notify all admins
+  sendAdminNotification(io, {
+    title: 'New Subscription Plan Created',
+    message: `A new subscription plan "${(result as any).name}" has been created.`,
+    type: 'subscription',
+  });
+
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
     success: true,
@@ -36,6 +46,13 @@ const updateSubscription = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
+  // Notify all admins
+  sendAdminNotification(io, {
+    title: 'New Subscription Plan Created',
+    message: `A new subscription plan "${(result as any).name}" has been created.`,
+    type: 'subscription',
+  });
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
@@ -55,6 +72,13 @@ const deleteSubscription = catchAsync(async (req: Request, res: Response) => {
       data: null,
     });
   }
+
+  // Notify all admins
+  sendAdminNotification(io, {
+    title: 'Subscription Plan Deleted',
+    message: `Subscription plan "${(result as any).name}" has been deleted.`,
+    type: 'subscription',
+  });
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,

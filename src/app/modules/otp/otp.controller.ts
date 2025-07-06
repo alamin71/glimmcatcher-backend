@@ -33,6 +33,8 @@ import catchAsync from '../../utils/catchAsync';
 import { otpServices } from './otp.service';
 import sendResponse from '../../utils/sendResponse';
 import { Request, Response } from 'express';
+import { io } from '../../../server';
+import { sendUserNotification, sendAdminNotification } from '../../../socketIo';
 
 // 1. Signup initiate: send OTP & token (token is returned for OTP verification)
 const signupInitiate = catchAsync(async (req: Request, res: Response) => {
@@ -53,6 +55,19 @@ const signupVerifyOtp = catchAsync(async (req: Request, res: Response) => {
   }
   const { otp } = req.body;
   const result = await otpServices.verifySignupOtp(token, otp);
+  // Send welcome notification to user
+  sendUserNotification(io, result.user._id.toString(), {
+    title: 'Welcome to Glimmcatcher',
+    message: 'Your account has been created!',
+    type: 'welcome',
+  });
+
+  // Notify admins
+  sendAdminNotification(io, {
+    title: 'New User Registered',
+    message: `User ${result.user.email} has registered.`,
+    type: 'user',
+  });
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

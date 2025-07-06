@@ -8,6 +8,9 @@ import { PaymentService } from './payment.service';
 import { sendEmail } from '../../utils/mailSender';
 import { TUser } from '../user/user.interface';
 import { v4 as uuidv4 } from 'uuid';
+import { io } from '../../../server';
+import { sendUserNotification } from '../../../socketIo';
+import { sendAdminNotification } from '../../../socketIo';
 
 // Helper to generate invoiceId if none from Stripe
 const generateInvoiceId = (): string => {
@@ -26,20 +29,43 @@ const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
 
   amount = Number(amount);
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.round(amount * 100),
-    currency: 'usd',
-    payment_method_types: ['card'],
-  });
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency: 'usd',
+      payment_method_types: ['card'],
+    });
 
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: 'Payment intent created',
-    data: {
-      clientSecret: paymentIntent.client_secret,
-    },
-  });
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Payment intent created',
+      data: {
+        clientSecret: paymentIntent.client_secret,
+      },
+    });
+  } catch (error) {
+    // Notify user about payment failure
+    sendUserNotification(io, req.user?.id, {
+      title: 'Payment Failed',
+      message: 'Your payment could not be processed. Please try again.',
+      type: 'payment',
+    });
+
+    // Notify admin about payment failure
+    sendAdminNotification(io, {
+      title: 'Payment Failed',
+      message: `User ${req.user?.id} attempted a payment but it failed.`,
+      type: 'payment',
+    });
+
+    // Respond with error
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Failed to create payment intent',
+      error: error instanceof Error ? error.message : error,
+    });
+  }
 });
 
 const savePayment = catchAsync(async (req: Request, res: Response) => {
@@ -79,6 +105,18 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
   if (!result) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to save payment!');
   }
+  // Real-time notification to user
+  sendUserNotification(io, userId, {
+    title: 'Payment Successful',
+    message: `Your payment of $${amount} was successful!`,
+    type: 'payment',
+  });
+  // Real-time notification to all admins
+  sendAdminNotification(io, {
+    title: 'New Payment Received',
+    message: `User ${userId} made a payment of $${amount}.`,
+    type: 'payment',
+  });
 
   // Email sending
   const userEmail = (result.user as TUser).email;
