@@ -26,6 +26,7 @@ import upload from '../../../middleware/fileUpload';
 const router = Router();
 
 router.post('/login', adminControllers.adminLogin);
+router.get('/me', auth('admin'), adminControllers.getProfile);
 
 router.patch(
   '/update-profile',

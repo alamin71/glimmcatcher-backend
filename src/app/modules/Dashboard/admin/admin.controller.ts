@@ -40,6 +40,19 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+const getProfile = catchAsync(async (req: Request, res: Response) => {
+  const admin = await Admin.findById(req.user.id).select('-password'); // exclude password
+  if (!admin) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Admin not found');
+  }
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Admin profile retrieved successfully',
+    data: admin,
+  });
+});
 
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   let image;
@@ -145,4 +158,5 @@ export const adminControllers = {
   forgotPassword,
   verifyOtp,
   resetPassword,
+  getProfile,
 };
