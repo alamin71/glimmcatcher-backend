@@ -364,10 +364,12 @@ const updatePhoneNumber = async (id: string, payload: Partial<TUser>) => {
 
   return result;
 };
+//Get total users count excluding soft-deleted users
 const getTotalUsersCount = async () => {
   const count = await User.countDocuments({ isDeleted: { $ne: true } });
   return count;
 };
+//Get monthly user starts
 const getMonthlyUserStats = async () => {
   const startOfCurrentMonth = new Date();
   startOfCurrentMonth.setDate(1);

@@ -17,6 +17,8 @@ router.post(
   validateRequest(authValidation.refreshTokenValidationSchema),
   authControllers.refreshToken,
 );
+router.post('/google', authControllers.googleLogin);
+router.post('/facebook', authControllers.facebookLogin);
 router.patch(
   '/change-password',
   auth(USER_ROLE.sup_admin, USER_ROLE.user),

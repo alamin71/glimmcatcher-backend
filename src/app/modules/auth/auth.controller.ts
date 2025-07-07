@@ -1,84 +1,3 @@
-// /* eslint-disable @typescript-eslint/ban-ts-comment */
-// import { Request, Response } from 'express';
-// import httpStatus from 'http-status';
-// import config from '../../config';
-// import catchAsync from '../../utils/catchAsync';
-// import sendResponse from '../../utils/sendResponse';
-// import { authServices } from './auth.service';
-// const login = catchAsync(async (req: Request, res: Response) => {
-//   const result = await authServices.login(req.body);
-//   const { refreshToken } = result;
-//   const cookieOptions = {
-//     secure: false,
-//     httpOnly: true,
-//     // maxAge: parseInt(config.jwt.refresh_expires_in || '31536000000'),
-//     maxAge: 31536000000,
-//   };
-
-//   if (config.NODE_ENV === 'production') {
-//     //@ts-ignore
-//     cookieOptions.sameSite = 'none';
-//   }
-//   res.cookie('refreshToken', refreshToken, cookieOptions);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Logged in successfully',
-//     data: result,
-//   });
-// });
-// const changePassword = catchAsync(async (req: Request, res: Response) => {
-//   console.log('🔐 Change Password Called with userId:', req.user?.userId);
-//   const result = await authServices.changePassword(req?.user?.userId, req.body);
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'password changed successfully',
-//     data: result,
-//   });
-// });
-// const forgotPassword = catchAsync(async (req: Request, res: Response) => {
-//   const result = await authServices.forgotPassword(req?.body?.email);
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'An otp sent to your email!',
-//     data: result,
-//   });
-// });
-
-// const resetPassword = catchAsync(async (req: Request, res: Response) => {
-//   console.log(req.body);
-//   const result = await authServices.resetPassword(
-//     req?.headers?.token as string,
-//     req?.body,
-//   );
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Password Reset successfully',
-//     data: result,
-//   });
-// });
-// const refreshToken = catchAsync(async (req, res) => {
-//   const { refreshToken } = req.cookies;
-//   console.log(refreshToken);
-//   const result = await authServices.refreshToken(refreshToken);
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Access token is retrieved successfully',
-//     data: result,
-//   });
-// });
-// export const authControllers = {
-//   login,
-//   changePassword,
-//   forgotPassword,
-//   resetPassword,
-//   refreshToken,
-// };
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
@@ -88,6 +7,10 @@ import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import config from '../../config';
 import AppError from '../../error/AppError';
 import User from '../user/user.model';
+import { OAuth2Client } from 'google-auth-library';
+import axios from 'axios';
+
+const googleClient = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID'); // Replace with your Google Client ID
 
 // const login = catchAsync(async (req: Request, res: Response) => {
 //   const { email, password } = req.body;
@@ -262,9 +185,112 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+const googleLogin = catchAsync(async (req: Request, res: Response) => {
+  const { idToken } = req.body;
+  if (!idToken) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Google idToken is required');
+  }
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Google Client ID
+  });
+  const payload = ticket.getPayload();
+  if (!payload?.email) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid Google token');
+  }
+
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    user = await User.create({
+      email: payload.email,
+      fullName: payload.name,
+      isVerified: true,
+      // Add other fields as needed
+    });
+  }
+
+  const accessToken = jwt.sign(
+    { id: user._id, role: user.role },
+    config.jwt_access_secret as Secret,
+    { expiresIn: config.jwt_access_expires_in },
+  );
+  const refreshToken = jwt.sign(
+    { id: user._id, role: user.role },
+    config.jwt_refresh_secret as Secret,
+    { expiresIn: config.jwt_refresh_expires_in },
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Google login successful',
+    data: {
+      user,
+      accessToken,
+      refreshToken,
+    },
+  });
+});
+
+const facebookLogin = catchAsync(async (req: Request, res: Response) => {
+  const { accessToken } = req.body;
+  if (!accessToken) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Facebook accessToken is required',
+    );
+  }
+
+  // Verify token and get user info from Facebook
+  const fbRes = await axios.get(
+    `https://graph.facebook.com/me?fields=id,name,email&access_token=${accessToken}`,
+  );
+  const { email, name } = fbRes.data;
+  if (!email) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Unable to get email from Facebook',
+    );
+  }
+
+  let user = await User.findOne({ email });
+  if (!user) {
+    user = await User.create({
+      email,
+      fullName: name,
+      isVerified: true,
+      // Add other fields as needed
+    });
+  }
+
+  const accessTokenJwt = jwt.sign(
+    { id: user._id, role: user.role },
+    config.jwt_access_secret as Secret,
+    { expiresIn: config.jwt_access_expires_in },
+  );
+  const refreshToken = jwt.sign(
+    { id: user._id, role: user.role },
+    config.jwt_refresh_secret as Secret,
+    { expiresIn: config.jwt_refresh_expires_in },
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Facebook login successful',
+    data: {
+      user,
+      accessToken: accessTokenJwt,
+      refreshToken,
+    },
+  });
+});
+
 export const authControllers = {
   login,
   resetPassword,
   changePassword,
   refreshToken,
+  googleLogin,
+  facebookLogin,
 };

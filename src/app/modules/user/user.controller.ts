@@ -236,6 +236,7 @@ const deleteAccount = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+//total users count by admin
 const getTotalUsersCount = catchAsync(async (_req: Request, res: Response) => {
   const count = await userServices.getTotalUsersCount();
   sendResponse(res, {
@@ -245,6 +246,7 @@ const getTotalUsersCount = catchAsync(async (_req: Request, res: Response) => {
     data: count,
   });
 });
+//monthly user starts by admin
 const getMonthlyUserStats = catchAsync(async (_req: Request, res: Response) => {
   const result = await userServices.getMonthlyUserStats();
   sendResponse(res, {
@@ -254,6 +256,7 @@ const getMonthlyUserStats = catchAsync(async (_req: Request, res: Response) => {
     data: result,
   });
 });
+//Get 12-month user growth overview by admin
 const getUserGrowthOverview = catchAsync(
   async (req: Request, res: Response) => {
     const year = req.query.year
