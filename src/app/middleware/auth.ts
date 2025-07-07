@@ -283,6 +283,7 @@ const auth = (...userRoles: string[]) => {
     // };
 
     req.user = {
+      id: isExist._id,
       userId: isExist._id,
       _id: isExist._id, // 👈 Keeps backward compatibility
       email: isExist.email,
