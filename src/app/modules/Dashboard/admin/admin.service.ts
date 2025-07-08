@@ -2,24 +2,6 @@ import { Admin } from './admin.model';
 import AppError from '../../../error/AppError';
 import httpStatus from 'http-status';
 
-// const updateAdminProfile = async (id: string, payload: Record<string, any>) => {
-//   const allowedFields = ['fullName', 'phoneNumber', 'image'];
-//   const updateData: Record<string, any> = {};
-
-//   allowedFields.forEach((field) => {
-//     if (payload[field] !== undefined) {
-//       updateData[field] = payload[field];
-//     }
-//   });
-//   const admin = await Admin.findByIdAndUpdate(id, updateData, {
-//     new: true,
-//     runValidators: true,
-//   });
-
-//   if (!admin) throw new AppError(httpStatus.NOT_FOUND, 'Admin not found');
-
-//   return admin;
-// };
 const updateAdminProfile = async (id: string, payload: Record<string, any>) => {
   const allowedFields = ['fullName', 'phoneNumber', 'image'];
   const updateData: Record<string, any> = {};
@@ -29,10 +11,6 @@ const updateAdminProfile = async (id: string, payload: Record<string, any>) => {
       updateData[field] = payload[field];
     }
   });
-
-  console.log('🔍 Incoming payload:', payload);
-  console.log('✅ Final updateData:', updateData);
-
   const admin = await Admin.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true,
