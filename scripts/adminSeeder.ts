@@ -19,6 +19,7 @@ const seedAdmin = async () => {
         fullName: 'Alamin',
         email,
         password: 'admin123', // pre-save hook e hash hobe
+        phoneNumber: '01824040194',
         role: 'admin',
       });
       console.log('✅ Admin seeded successfully');
