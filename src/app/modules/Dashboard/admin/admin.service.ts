@@ -7,9 +7,10 @@ const updateAdminProfile = async (id: string, payload: Record<string, any>) => {
   const updateData: Record<string, any> = {};
 
   allowedFields.forEach((field) => {
-    if (payload[field]) updateData[field] = payload[field];
+    if (payload[field] !== undefined) {
+      updateData[field] = payload[field];
+    }
   });
-
   const admin = await Admin.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true,
