@@ -3,6 +3,7 @@ import Wallet from './wallet.model';
 import AppError from '../../error/AppError';
 
 const insertTextToWallet = async (payload: any) => {
+  console.log('🔥 Payload saving to DB:', JSON.stringify(payload, null, 2));
   const result = await Wallet.create(payload);
   return result;
 };
