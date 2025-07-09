@@ -6,13 +6,32 @@ import walletService from './wallet.service';
 import { generateAIImage } from '../../utils/aiImageGenerator';
 import { uploadFromUrlToS3 } from '../../utils/uploadFromUrlToS3';
 
+// const insertTextToWallet = catchAsync(async (req: Request, res: Response) => {
+//   const { userId } = req.user;
+//   const result = await walletService.insertTextToWallet({
+//     note: { ...req.body },
+//     user: userId,
+//     type: 'text',
+//   });
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Note added successfully',
+//     data: result,
+//   });
+// });
 const insertTextToWallet = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
+
   const result = await walletService.insertTextToWallet({
-    note: { ...req.body },
+    text: {
+      title: req.body.title,
+      description: req.body.description,
+    },
     user: userId,
     type: 'text',
   });
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -20,6 +39,7 @@ const insertTextToWallet = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
   let voice;
   if (req?.file) {
