@@ -60,7 +60,7 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'A successfully',
+    message: 'Voice added successfully',
     data: result,
   });
 });
