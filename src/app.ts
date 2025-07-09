@@ -8,6 +8,7 @@ import router from './app/routes';
 
 const app: Application = express();
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 //parsers
 app.use(express.json());
