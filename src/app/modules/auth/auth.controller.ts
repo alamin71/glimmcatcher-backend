@@ -205,7 +205,6 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
       email: payload.email,
       fullName: payload.name,
       isVerified: true,
-      // Add other fields as needed
     });
   }
 
@@ -259,7 +258,6 @@ const facebookLogin = catchAsync(async (req: Request, res: Response) => {
       email,
       fullName: name,
       isVerified: true,
-      // Add other fields as needed
     });
   }
 

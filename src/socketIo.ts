@@ -1,18 +1,30 @@
 import { Server as HttpServer } from 'http';
 import { Server } from 'socket.io';
 
+// Common: Add date and time to any notification
+const enrichNotification = (notification: any) => {
+  const now = new Date();
+  return {
+    ...notification,
+    date: now.toLocaleDateString(),
+    time: now.toLocaleTimeString(),
+  };
+};
+
 // Helper: Send notification to a specific user
 export const sendUserNotification = (
   io: Server,
   userId: string,
   notification: any,
 ) => {
-  io.to(userId).emit('notification', notification);
+  const enrichedNotification = enrichNotification(notification);
+  io.to(userId).emit('notification', enrichedNotification);
 };
 
 // Helper: Send notification to all admins
 export const sendAdminNotification = (io: Server, notification: any) => {
-  io.to('admin').emit('notification', notification);
+  const enrichedNotification = enrichNotification(notification);
+  io.to('admin').emit('notification', enrichedNotification);
 };
 
 const initializeSocketIO = (server: HttpServer) => {
@@ -51,6 +63,13 @@ const initializeSocketIO = (server: HttpServer) => {
         sendUserNotification(io, userId, {
           title: 'Test Notification',
           message: data?.message || 'Hello!',
+          type: 'info',
+        });
+
+        // Optional: Also notify all admins
+        sendAdminNotification(io, {
+          title: 'User sent a test notification',
+          message: `User ${userId} says: ${data?.message}`,
           type: 'info',
         });
       });
