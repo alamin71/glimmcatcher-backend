@@ -4,13 +4,13 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import AppError from '../../error/AppError';
 import stripe from '../../config/stripe';
+import config from '../../config/index';
 import { PaymentService } from './payment.service';
 import { sendEmail } from '../../utils/mailSender';
 import { TUser } from '../user/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { io } from '../../../server';
-import { sendUserNotification } from '../../../socketIo';
-import { sendAdminNotification } from '../../../socketIo';
+import { sendUserNotification, sendAdminNotification } from '../../../socketIo';
 
 // Helper to generate invoiceId if none from Stripe
 const generateInvoiceId = (): string => {
@@ -45,21 +45,18 @@ const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    // Notify user about payment failure
     sendUserNotification(io, req.user?.id, {
       title: 'Payment Failed',
       message: 'Your payment could not be processed. Please try again.',
       type: 'payment',
     });
 
-    // Notify admin about payment failure
     sendAdminNotification(io, {
       title: 'Payment Failed',
       message: `User ${req.user?.id} attempted a payment but it failed.`,
       type: 'payment',
     });
 
-    // Respond with error
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Failed to create payment intent',
@@ -105,20 +102,19 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
   if (!result) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to save payment!');
   }
-  // Real-time notification to user
+
   sendUserNotification(io, userId, {
     title: 'Payment Successful',
     message: `Your payment of $${amount} was successful!`,
     type: 'payment',
   });
-  // Real-time notification to all admins
+
   sendAdminNotification(io, {
     title: 'New Payment Received',
     message: `User ${userId} made a payment of $${amount}.`,
     type: 'payment',
   });
 
-  // Email sending
   const userEmail = (result.user as TUser).email;
 
   if (userEmail) {
@@ -143,6 +139,57 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+// --- webhook handler ---
+const stripeWebhook = async (req: Request, res: Response) => {
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = config.stripe_webhook_secret;
+
+  if (!sig || !webhookSecret) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .send('Missing signature or webhook secret');
+  }
+
+  let event;
+
+  try {
+    // IMPORTANT: rawBody must be available on req (express.raw middleware in route)
+    event = stripe.webhooks.constructEvent(
+      (req as any).rawBody,
+      sig,
+      webhookSecret,
+    );
+  } catch (err: any) {
+    console.error('⚠️ Webhook signature verification failed.', err.message);
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .send(`Webhook Error: ${err.message}`);
+  }
+
+  switch (event.type) {
+    case 'payment_intent.succeeded': {
+      const paymentIntent = event.data.object;
+      // Update payment status in DB
+      await PaymentService.updatePaymentStatus(paymentIntent.id, 'succeeded');
+
+      // Optional: send notification or email if needed
+      break;
+    }
+    case 'payment_intent.payment_failed': {
+      const paymentIntent = event.data.object;
+      await PaymentService.updatePaymentStatus(paymentIntent.id, 'failed');
+      break;
+    }
+    // You can handle more Stripe events here if needed
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+
+  res.status(StatusCodes.OK).json({ received: true });
+};
+
+// Other existing controller functions below unchanged...
 
 const getAllPayments = catchAsync(async (req: Request, res: Response) => {
   const result = await PaymentService.getAllPayments(req.query);
@@ -172,7 +219,7 @@ const getSinglePayment = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-// Total Earnings from service
+
 const getTotalEarnings = catchAsync(async (req: Request, res: Response) => {
   const total = await PaymentService.getTotalEarnings();
 
@@ -184,7 +231,6 @@ const getTotalEarnings = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// Today's Earnings from service
 const getTodaysEarnings = catchAsync(async (req: Request, res: Response) => {
   const total = await PaymentService.getTodaysEarnings();
 
@@ -195,6 +241,7 @@ const getTodaysEarnings = catchAsync(async (req: Request, res: Response) => {
     data: total,
   });
 });
+
 const getMonthlyEarningsStats = catchAsync(
   async (req: Request, res: Response) => {
     const result = await PaymentService.getMonthlyEarningsStats();
@@ -206,6 +253,7 @@ const getMonthlyEarningsStats = catchAsync(
     });
   },
 );
+
 const getEarningsOverview = catchAsync(async (req: Request, res: Response) => {
   const year = req.query.year ? parseInt(req.query.year as string) : undefined;
   const result = await PaymentService.get12MonthGrowthPercentage(year);
@@ -217,6 +265,7 @@ const getEarningsOverview = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 export const PaymentController = {
   createPaymentIntent,
   savePayment,
@@ -226,4 +275,5 @@ export const PaymentController = {
   getTodaysEarnings,
   getMonthlyEarningsStats,
   getEarningsOverview,
+  stripeWebhook, // added here
 };

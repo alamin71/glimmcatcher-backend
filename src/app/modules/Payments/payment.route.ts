@@ -4,6 +4,14 @@ import auth from '../../middleware/auth';
 import { USER_ROLE } from '../user/user.constant';
 
 const router = Router();
+router.post(
+  '/webhook',
+  // express raw middleware to keep raw body for stripe webhook verification
+  (req, res, next) => {
+    require('express').raw({ type: 'application/json' })(req, res, next);
+  },
+  PaymentController.stripeWebhook,
+);
 
 router.post(
   '/create-payment-intent',

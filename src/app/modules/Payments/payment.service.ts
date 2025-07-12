@@ -181,6 +181,13 @@ const get12MonthGrowthPercentage = async (year?: number) => {
     trend: percentageChange >= 0 ? 'up' : 'down',
   };
 };
+const updatePaymentStatus = async (transactionId: string, status: string) => {
+  return await Payment.findOneAndUpdate(
+    { transactionId },
+    { status },
+    { new: true },
+  );
+};
 
 export const PaymentService = {
   savePaymentDetails,
@@ -191,4 +198,5 @@ export const PaymentService = {
   getMonthlyEarningsStats,
   getEarningsLast12Months,
   get12MonthGrowthPercentage,
+  updatePaymentStatus,
 };
