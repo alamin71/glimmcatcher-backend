@@ -210,6 +210,38 @@ const getUserGrowthPercentage = async (year?: number) => {
     trend: percentageChange >= 0 ? 'up' : 'down',
   };
 };
+const blockUser = async (id: string) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (user.role === 'admin' || user.role === 'super_admin') {
+    throw new AppError(httpStatus.BAD_REQUEST, 'You cannot block an admin');
+  }
+  if (!user.isActive) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User is already blocked');
+  }
+  user.isActive = false;
+  await user.save();
+
+  return user;
+};
+
+const unblockUser = async (id: string) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  if (user.isActive) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User is already active');
+  }
+
+  user.isActive = true;
+  await user.save();
+
+  return user;
+};
 
 export const userServices = {
   getme,
@@ -222,4 +254,6 @@ export const userServices = {
   getMonthlyUserStats,
   getUsersLast12Months,
   getUserGrowthPercentage,
+  blockUser,
+  unblockUser,
 };

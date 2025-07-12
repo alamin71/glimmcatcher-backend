@@ -52,6 +52,19 @@ router.get(
   auth(USER_ROLE.admin, USER_ROLE.user),
   userControllers.getme,
 );
+// Block user
+router.patch(
+  '/block/:id',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  userControllers.blockUser,
+);
+
+// Unblock user
+router.patch(
+  '/unblock/:id',
+  auth(USER_ROLE.admin, USER_ROLE.sup_admin),
+  userControllers.unblockUser,
+);
 
 router.get(
   '/:id',
