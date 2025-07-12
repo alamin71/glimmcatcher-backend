@@ -1,6 +1,7 @@
 import { Payment } from './payment.model';
 import { IPayment } from './payment.interface';
 import { subMonths, startOfMonth } from 'date-fns';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const savePaymentDetails = async (payload: IPayment) => {
   const created = await Payment.create(payload);
@@ -12,11 +13,24 @@ const getSinglePayment = async (id: string) => {
   return await Payment.findById(id).populate('user').populate('subscriptionId');
 };
 
-const getAllPayments = async () => {
-  const payments = await Payment.find()
+const getAllPayments = async (query: Record<string, any>) => {
+  const builder = new QueryBuilder(Payment.find(), query)
+    .search(['transactionId', 'status'])
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+
+  let data = await builder.modelQuery
     .populate('user')
     .populate('subscriptionId');
-  return payments;
+
+  const meta = await builder.countTotal();
+
+  return {
+    data,
+    meta,
+  };
 };
 const getTotalEarnings = async (): Promise<number> => {
   const result = await Payment.aggregate([

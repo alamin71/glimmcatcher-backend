@@ -145,13 +145,14 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllPayments = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentService.getAllPayments();
+  const result = await PaymentService.getAllPayments(req.query);
 
   sendResponse(res, {
-    statusCode: StatusCodes.OK,
+    statusCode: 200,
     success: true,
     message: 'Payments retrieved successfully',
-    data: result,
+    data: result.data,
+    meta: result.meta,
   });
 });
 

@@ -213,13 +213,15 @@ const getsingleUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Get all users (used by admin)
-const getAllUsers = catchAsync(async (_req: Request, res: Response) => {
-  const result = await userServices.getAllUsers();
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userServices.getAllUsers(req.query);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'All users retrieved successfully',
-    data: result,
+    message: 'Users retrieved successfully',
+    data: result.data,
+    meta: result.meta,
   });
 });
 

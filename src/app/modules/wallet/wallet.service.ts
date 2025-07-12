@@ -22,7 +22,12 @@ const insertVideosOrImagesToWallet = async (payload: any) => {
 
 const getMyWalletData = async (query: Record<string, any>) => {
   const walletModel = new QueryBuilder(Wallet.find(), query)
-    .search([])
+    .search([
+      'text.title',
+      'text.description',
+      'voice.title',
+      'imageVideo.title',
+    ])
     .filter()
     .paginate()
     .sort()
