@@ -7,7 +7,7 @@ export interface IImageOrVideo {
   url: string;
 }
 export interface voiceLink {
-  id: number;
+  id: string;
   url: string;
 }
 
