@@ -72,6 +72,7 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
 
   if (req?.file) {
     voiceLink = await uploadToS3(req.file, 'voice/');
+    console.log('🧪 Uploaded Voice File:', voiceLink);
   }
 
   const result = await walletService.insertAudioToWallet({
