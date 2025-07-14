@@ -40,23 +40,49 @@ const insertTextToWallet = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
-  let voice;
-  if (req?.file) {
-    voice = await uploadToS3(req?.file, 'voice/');
-  }
-  const data = {
-    title: req.body.title,
-    voiceLink: voice,
-  };
+// const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
+//   let voice;
+//   if (req?.file) {
+//     voice = await uploadToS3(req?.file, 'voice/');
+//   }
+//   const data = {
+//     title: req.body.title,
+//     voiceLink: voice,
+//   };
 
+//   const { userId } = req.user;
+//   const result = await walletService.insertAudioToWallet({
+//     ...req.body,
+//     user: userId,
+//     type: 'voice',
+//     voice: data,
+//   });
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Voice added successfully',
+//     data: result,
+//   });
+// });
+const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
+  const { title } = req.body;
   const { userId } = req.user;
+
+  let voiceLink;
+
+  if (req?.file) {
+    voiceLink = await uploadToS3(req.file, 'voice/');
+  }
+
   const result = await walletService.insertAudioToWallet({
-    ...req.body,
     user: userId,
     type: 'voice',
-    voice: data,
+    voice: {
+      title,
+      voiceLink, // ✅ { id, url }
+    },
   });
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -64,6 +90,7 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 // const insertAiImageToWallet = catchAsync(
 //   async (req: Request, res: Response) => {
 //     let image;
