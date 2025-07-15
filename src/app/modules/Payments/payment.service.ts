@@ -13,7 +13,44 @@ const getSinglePayment = async (id: string) => {
   return await Payment.findById(id).populate('user').populate('subscriptionId');
 };
 
+// const getAllPayments = async (query: Record<string, any>) => {
+//   const builder = new QueryBuilder(Payment.find(), query)
+//     .search(['transactionId', 'status'])
+//     .filter()
+//     .paginate()
+//     .sort()
+//     .fields();
+
+//   let data = await builder.modelQuery
+//     .populate('user')
+//     .populate('subscriptionId');
+
+//   const meta = await builder.countTotal();
+
+//   return {
+//     data,
+//     meta,
+//   };
+// };
 const getAllPayments = async (query: Record<string, any>) => {
+  const { year, month } = query;
+
+  // Optional date range filter
+  if (year) {
+    const y = parseInt(year);
+    const m = month ? parseInt(month) : undefined;
+
+    if (!isNaN(y)) {
+      const startDate = new Date(y, m ? m - 1 : 0, 1);
+      const endDate = m ? new Date(y, m, 0, 23, 59, 59) : new Date(y + 1, 0, 1);
+
+      query.paymentDate = {
+        $gte: startDate,
+        $lt: endDate,
+      };
+    }
+  }
+
   const builder = new QueryBuilder(Payment.find(), query)
     .search(['transactionId', 'status'])
     .filter()
@@ -21,7 +58,7 @@ const getAllPayments = async (query: Record<string, any>) => {
     .sort()
     .fields();
 
-  let data = await builder.modelQuery
+  const data = await builder.modelQuery
     .populate('user')
     .populate('subscriptionId');
 
@@ -32,6 +69,7 @@ const getAllPayments = async (query: Record<string, any>) => {
     meta,
   };
 };
+
 const getTotalEarnings = async (): Promise<number> => {
   const result = await Payment.aggregate([
     { $match: { status: 'succeeded' } },

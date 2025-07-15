@@ -275,5 +275,5 @@ export const PaymentController = {
   getTodaysEarnings,
   getMonthlyEarningsStats,
   getEarningsOverview,
-  stripeWebhook, // added here
+  stripeWebhook,
 };
