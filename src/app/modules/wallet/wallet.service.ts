@@ -7,7 +7,22 @@ const insertTextToWallet = async (payload: any) => {
   const result = await Wallet.create(payload);
   return result;
 };
+const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024;
+// const insertAudioToWallet = async (payload: any) => {
+//   const result = await Wallet.create(payload);
+//   return result;
+// };
 const insertAudioToWallet = async (payload: any) => {
+  const audioFile = payload?.voice?.file;
+
+  if (!audioFile) {
+    throw new AppError(400, 'Audio file is missing');
+  }
+
+  if (audioFile.size > MAX_AUDIO_FILE_SIZE) {
+    throw new AppError(400, 'Audio file size exceeds 50MB limit');
+  }
+
   const result = await Wallet.create(payload);
   return result;
 };

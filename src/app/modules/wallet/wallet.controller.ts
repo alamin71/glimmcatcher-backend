@@ -80,7 +80,8 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
     type: 'voice',
     voice: {
       title,
-      voiceLink, // ✅ { id, url }
+      voiceLink,
+      file: req.file,
     },
   });
 
