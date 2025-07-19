@@ -2,7 +2,7 @@ import { OpenAI } from 'openai';
 import config from '../../app/config';
 
 const openai = new OpenAI({
-  apiKey: config.openai_api_key, // securely read from .env
+  apiKey: config.openai_api_key,
 });
 
 export const generateAIImage = async (prompt: string): Promise<string> => {

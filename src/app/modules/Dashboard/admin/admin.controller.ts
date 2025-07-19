@@ -41,7 +41,7 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const getProfile = catchAsync(async (req: Request, res: Response) => {
-  const admin = await Admin.findById(req.user.id).select('-password'); // exclude password
+  const admin = await Admin.findById(req.user.id).select('-password');
   if (!admin) {
     throw new AppError(httpStatus.NOT_FOUND, 'Admin not found');
   }
@@ -94,7 +94,7 @@ const otpStore = new Map<string, string>();
 
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const otp = await adminService.setForgotOtp(req.body.email);
-  otpStore.set(otp.toString(), req.body.email); // ✅ store otp → email
+  otpStore.set(otp.toString(), req.body.email); // store otp → email
   sendResponse(res, {
     statusCode: 200,
     success: true,

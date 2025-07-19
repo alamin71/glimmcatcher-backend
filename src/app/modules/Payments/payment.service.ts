@@ -13,25 +13,6 @@ const getSinglePayment = async (id: string) => {
   return await Payment.findById(id).populate('user').populate('subscriptionId');
 };
 
-// const getAllPayments = async (query: Record<string, any>) => {
-//   const builder = new QueryBuilder(Payment.find(), query)
-//     .search(['transactionId', 'status'])
-//     .filter()
-//     .paginate()
-//     .sort()
-//     .fields();
-
-//   let data = await builder.modelQuery
-//     .populate('user')
-//     .populate('subscriptionId');
-
-//   const meta = await builder.countTotal();
-
-//   return {
-//     data,
-//     meta,
-//   };
-// };
 const getAllPayments = async (query: Record<string, any>) => {
   const { year, month } = query;
 

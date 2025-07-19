@@ -8,10 +8,7 @@ const insertTextToWallet = async (payload: any) => {
   return result;
 };
 const MAX_AUDIO_FILE_SIZE = 50 * 1024 * 1024;
-// const insertAudioToWallet = async (payload: any) => {
-//   const result = await Wallet.create(payload);
-//   return result;
-// };
+
 const insertAudioToWallet = async (payload: any) => {
   const audioFile = payload?.voice?.file;
 

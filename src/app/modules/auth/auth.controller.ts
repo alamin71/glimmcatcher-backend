@@ -156,7 +156,7 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
   }
   const ticket = await googleClient.verifyIdToken({
     idToken,
-    audience: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Google Client ID
+    audience: 'YOUR_GOOGLE_CLIENT_ID', // Google Client ID
   });
   const payload = ticket.getPayload();
   if (!payload?.email) {
