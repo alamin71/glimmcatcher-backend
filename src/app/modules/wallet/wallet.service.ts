@@ -33,7 +33,7 @@ const insertVideosOrImagesToWallet = async (payload: any) => {
 };
 
 const getMyWalletData = async (query: Record<string, any>) => {
-  const walletModel = new QueryBuilder(Wallet.find(), query)
+  const walletModel = new QueryBuilder(Wallet.find({ isDeleted: false }), query)
     .search([
       'text.title',
       'text.description',
@@ -44,6 +44,7 @@ const getMyWalletData = async (query: Record<string, any>) => {
     .paginate()
     .sort()
     .fields();
+
   const data = await walletModel.modelQuery;
   const meta = await walletModel.countTotal();
   return {
@@ -52,18 +53,21 @@ const getMyWalletData = async (query: Record<string, any>) => {
   };
 };
 
-const deleteWalletData = async (id: string) => {
-  const result = await Wallet.findByIdAndUpdate(
-    id,
-    { isDeleted: true },
-    { new: true },
-  );
+const deleteWalletData = async (id: string, userId: string) => {
+  const wallet = await Wallet.findOne({
+    _id: id,
+    user: userId,
+    isDeleted: false,
+  });
 
-  if (!result) {
-    throw new AppError(404, 'Wallet data not found');
+  if (!wallet) {
+    throw new AppError(404, 'Wallet data not found or already deleted');
   }
 
-  return result;
+  wallet.isDeleted = true;
+  await wallet.save();
+
+  return wallet;
 };
 
 const walletService = {

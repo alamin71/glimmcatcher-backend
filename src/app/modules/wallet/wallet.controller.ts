@@ -162,8 +162,18 @@ const getMyWalletData = catchAsync(async (req: Request, res: Response) => {
     meta: result?.meta,
   });
 });
+// const deleteWalletData = catchAsync(async (req: Request, res: Response) => {
+//   const result = await walletService.deleteWalletData(req.params.id);
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Wallet data deleted successfully',
+//     data: result,
+//   });
+// });
 const deleteWalletData = catchAsync(async (req: Request, res: Response) => {
-  const result = await walletService.deleteWalletData(req.params.id);
+  const { userId } = req.user;
+  const result = await walletService.deleteWalletData(req.params.id, userId);
   sendResponse(res, {
     statusCode: 200,
     success: true,
