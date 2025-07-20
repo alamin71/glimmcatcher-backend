@@ -5,6 +5,8 @@ import upload from '../../middleware/fileUpload';
 import parseData from '../../middleware/parseData';
 import { USER_ROLE } from '../user/user.constant';
 import walletController from './wallet.controller';
+import { checkSubscriptionValidity } from '../../middleware/subscriptionCheck';
+
 const router = Router();
 router.get('/', auth(USER_ROLE.user), walletController.getMyWalletData);
 router.post(
@@ -22,6 +24,7 @@ router.post(
 router.post(
   '/create-ai-images',
   auth(USER_ROLE.user),
+  checkSubscriptionValidity,
   walletController.insertAiImageToWallet,
 );
 

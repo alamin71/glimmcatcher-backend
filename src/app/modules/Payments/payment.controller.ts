@@ -11,6 +11,8 @@ import { TUser } from '../user/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { io } from '../../../server';
 import { sendUserNotification, sendAdminNotification } from '../../../socketIo';
+import { Subscription } from '../Dashboard/Subscription/subscription.model';
+import User from '../user/user.model';
 
 // Helper to generate invoiceId if none from Stripe
 const generateInvoiceId = (): string => {
@@ -88,6 +90,19 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
   // Decide final invoice ID
   const finalInvoiceId =
     clientInvoiceId || stripeInvoiceId || generateInvoiceId();
+  //subscription plan details
+  const subscription = await Subscription.findById(subscriptionId);
+  if (!subscription) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Subscription plan not found');
+  }
+
+  const now = new Date();
+  let validTill = new Date(now);
+  if (subscription.billingCycle === 'monthly') {
+    validTill.setMonth(validTill.getMonth() + 1);
+  } else if (subscription.billingCycle === 'yearly') {
+    validTill.setFullYear(validTill.getFullYear() + 1);
+  }
 
   const result = await PaymentService.savePaymentDetails({
     user: userId,
@@ -102,7 +117,14 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
   if (!result) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to save payment!');
   }
-
+  await User.findByIdAndUpdate(userId, {
+    subscription: {
+      plan: subscription._id,
+      startsAt: now,
+      expiresAt: validTill,
+      status: 'active',
+    },
+  });
   sendUserNotification(io, userId, {
     title: 'Payment Successful',
     message: `Your payment of $${amount} was successful!`,

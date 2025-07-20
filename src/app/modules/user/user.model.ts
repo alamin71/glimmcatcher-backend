@@ -90,6 +90,19 @@ const UserSchema = new Schema<TUser, UserModel>(
       enum: ['Male', 'Female'],
       required: true,
     },
+    subscription: {
+      plan: {
+        type: Schema.Types.ObjectId,
+        ref: 'Subscription',
+      },
+      startsAt: Date,
+      expiresAt: Date,
+      status: {
+        type: String,
+        enum: ['active', 'expired', 'cancelled'],
+        default: 'active',
+      },
+    },
 
     isActive: {
       type: Boolean,
