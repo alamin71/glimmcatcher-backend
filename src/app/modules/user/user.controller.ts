@@ -30,6 +30,56 @@ const updatePhoneNumber = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// const updateProfile = catchAsync(async (req: Request, res: Response) => {
+//   let image;
+
+//   // Upload image if provided
+//   if (req.file) {
+//     image = await uploadToS3(req.file, 'profile/');
+//   }
+
+//   // Determine which user's profile is being updated
+//   const isAdmin = req.user.role === 'admin' || req.user.role === 'sup_admin';
+//   const userIdToUpdate = isAdmin && req.params.id ? req.params.id : req.user.id;
+
+//   // If admin is updating their own profile, make gender optional
+//   const isAdminUpdatingSelf = isAdmin && userIdToUpdate === req.user.id;
+
+//   // Build update data
+//   const updateData: Record<string, any> = {
+//     ...req.body,
+//     ...(image && { image }),
+//   };
+
+//   // Remove gender if admin is updating their own profile and gender is missing
+//   if (isAdminUpdatingSelf && !req.body.gender) {
+//     delete updateData.gender;
+//   }
+
+//   // Call the service to update
+//   const result = await userServices.updateProfile(userIdToUpdate, updateData);
+//   // Send notification to user
+//   sendUserNotification(io, userIdToUpdate, {
+//     title: 'Profile Updated',
+//     message: 'Your profile has been updated successfully.',
+//     type: 'profile',
+//   });
+//   // Respond with updated user info and context
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Profile updated successfully',
+//     data: {
+//       updatedUser: result,
+//       updatedBy: {
+//         id: req.user.id,
+//         role: req.user.role,
+//         actingOn: userIdToUpdate,
+//       },
+//     },
+//   });
+// });
+
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   let image;
 
@@ -41,6 +91,13 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   // Determine which user's profile is being updated
   const isAdmin = req.user.role === 'admin' || req.user.role === 'sup_admin';
   const userIdToUpdate = isAdmin && req.params.id ? req.params.id : req.user.id;
+
+  // 🔍 DEBUG: Log all relevant IDs
+  console.log('🔍 DEBUG - Profile Update:');
+  console.log('  - req.user.id:', req.user.id, typeof req.user.id);
+  console.log('  - req.params.id:', req.params.id, typeof req.params.id);
+  console.log('  - userIdToUpdate:', userIdToUpdate, typeof userIdToUpdate);
+  console.log('  - isAdmin:', isAdmin);
 
   // If admin is updating their own profile, make gender optional
   const isAdminUpdatingSelf = isAdmin && userIdToUpdate === req.user.id;
@@ -58,12 +115,80 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
   // Call the service to update
   const result = await userServices.updateProfile(userIdToUpdate, updateData);
-  // Send notification to user
-  sendUserNotification(io, userIdToUpdate, {
-    title: 'Profile Updated',
-    message: 'Your profile has been updated successfully.',
-    type: 'profile',
-  });
+
+  // 🔍 DEBUG: Check socket rooms before sending notification
+  console.log('🔍 DEBUG - Socket Rooms:');
+  console.log('  - All rooms:', Array.from(io.sockets.adapter.rooms.keys()));
+  console.log(
+    '  - Room for userIdToUpdate exists:',
+    io.sockets.adapter.rooms.has(userIdToUpdate.toString()),
+  );
+  console.log(
+    '  - Room for userIdToUpdate (string):',
+    io.sockets.adapter.rooms.get(userIdToUpdate.toString()),
+  );
+
+  // Convert userIdToUpdate to string (just in case)
+  const targetUserId = userIdToUpdate.toString();
+
+  console.log('🔍 DEBUG - Before sending notification:');
+  console.log('  - targetUserId:', targetUserId, typeof targetUserId);
+  console.log('  - Room exists:', io.sockets.adapter.rooms.has(targetUserId));
+
+  // Send notification to user with enhanced debugging
+  try {
+    const notificationData = {
+      title: 'Profile Updated',
+      message: 'Your profile has been updated successfully.',
+      type: 'profile',
+      userId: targetUserId, // Include userId in notification for debugging
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log('📤 Sending notification:', notificationData);
+    console.log('📤 To room:', targetUserId);
+
+    // Check if room exists and has sockets
+    const room = io.sockets.adapter.rooms.get(targetUserId);
+    if (!room || room.size === 0) {
+      console.log('❌ Room not found or empty for userId:', targetUserId);
+
+      // Try to find user in other rooms
+      console.log('🔍 Searching for user in all rooms:');
+      for (const [roomId, roomSockets] of io.sockets.adapter.rooms) {
+        if (roomSockets.has(targetUserId) || roomId.includes(targetUserId)) {
+          console.log(
+            '  - Found user in room:',
+            roomId,
+            'with sockets:',
+            Array.from(roomSockets),
+          );
+        }
+      }
+    } else {
+      console.log(
+        '✅ Room found with',
+        room.size,
+        'socket(s):',
+        Array.from(room),
+      );
+    }
+
+    // Send the notification
+    sendUserNotification(io, targetUserId, notificationData);
+
+    // Also try sending to req.user.id as backup (if different)
+    if (req.user.id.toString() !== targetUserId) {
+      console.log('📤 Also sending to req.user.id as backup:', req.user.id);
+      sendUserNotification(io, req.user.id.toString(), {
+        ...notificationData,
+        message: 'Profile update completed successfully.',
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error sending notification:', error);
+  }
+
   // Respond with updated user info and context
   sendResponse(res, {
     statusCode: 200,
