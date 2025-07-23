@@ -55,48 +55,106 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const insertAiImageToWallet = catchAsync(
-  async (req: Request, res: Response) => {
-    const { prompt } = req.body;
-    const { userId } = req.user;
+// const insertAiImageToWallet = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const { prompt } = req.body;
+//     const { userId } = req.user;
 
-    if (!prompt) {
-      return sendResponse(res, {
-        statusCode: 400,
-        success: false,
-        message: 'Prompt is required',
-        data: null,
-      });
-    }
+//     if (!prompt) {
+//       return sendResponse(res, {
+//         statusCode: 400,
+//         success: false,
+//         message: 'Prompt is required',
+//         data: null,
+//       });
+//     }
 
-    const openaiImageUrl = await generateAIImage(prompt);
+//     const openaiImageUrl = await generateAIImage(prompt);
 
-    const s3Image = await uploadFromUrlToS3(openaiImageUrl, 'wallet/aiImage/');
+//     const s3Image = await uploadFromUrlToS3(openaiImageUrl, 'wallet/aiImage/');
 
-    const result = await walletService.insertAiImageToWallet({
-      user: userId,
-      type: 'ai_generate',
+//     const result = await walletService.insertAiImageToWallet({
+//       user: userId,
+//       type: 'ai_generate',
+//       prompt,
+//       aiGenerate: {
+//         id: s3Image.id,
+//         url: s3Image.url,
+//       },
+//     });
+
+//     sendResponse(res, {
+//       statusCode: 200,
+//       success: true,
+//       message: 'AI image generated and saved successfully',
+//       data: {
+//         prompt,
+//         openaiImageUrl,
+//         s3ImageUrl: s3Image.url,
+//         saved: result,
+//       },
+//     });
+//   },
+// );
+
+const generateAiImage = catchAsync(async (req: Request, res: Response) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'Prompt is required',
+      data: null,
+    });
+  }
+
+  const openaiImageUrl = await generateAIImage(prompt);
+  const s3Image = await uploadFromUrlToS3(openaiImageUrl, 'wallet/aiImage/');
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'AI image generated successfully',
+    data: {
       prompt,
-      aiGenerate: {
-        id: s3Image.id,
-        url: s3Image.url,
-      },
-    });
+      openaiImageUrl,
+      s3ImageUrl: s3Image.url,
+      s3ImageId: s3Image.id,
+    },
+  });
+});
 
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: 'AI image generated and saved successfully',
-      data: {
-        prompt,
-        openaiImageUrl,
-        s3ImageUrl: s3Image.url,
-        saved: result,
-      },
-    });
-  },
-);
+const saveAiImageToWallet = catchAsync(async (req: Request, res: Response) => {
+  const { prompt, s3ImageUrl, s3ImageId } = req.body;
+  const { userId } = req.user;
 
+  if (!prompt || !s3ImageUrl || !s3ImageId) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'Required fields missing',
+      data: null,
+    });
+  }
+
+  const result = await walletService.saveAiImageToWallet({
+    user: userId,
+    type: 'ai_generate',
+    prompt,
+    aiGenerate: {
+      id: s3ImageId,
+      url: s3ImageUrl,
+    },
+  });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'AI image saved successfully',
+    data: result,
+  });
+});
 const insertVideosOrImagesToWallet = catchAsync(
   async (req: Request, res: Response) => {
     let images: { url: string; id: string }[] = [];
@@ -137,7 +195,7 @@ const insertVideosOrImagesToWallet = catchAsync(
       },
     };
 
-    const result = await walletService.insertAiImageToWallet(payload);
+    const result = await walletService.insertVideosOrImagesToWallet(payload);
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -185,7 +243,8 @@ const deleteWalletData = catchAsync(async (req: Request, res: Response) => {
 const walletController = {
   insertTextToWallet,
   insertAudioToWallet,
-  insertAiImageToWallet,
+  generateAiImage,
+  saveAiImageToWallet,
   insertVideosOrImagesToWallet,
   getMyWalletData,
   deleteWalletData,

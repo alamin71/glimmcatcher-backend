@@ -23,7 +23,7 @@ const insertAudioToWallet = async (payload: any) => {
   const result = await Wallet.create(payload);
   return result;
 };
-const insertAiImageToWallet = async (payload: any) => {
+const saveAiImageToWallet = async (payload: any) => {
   const result = await Wallet.create(payload);
   return result;
 };
@@ -73,7 +73,7 @@ const deleteWalletData = async (id: string, userId: string) => {
 const walletService = {
   insertTextToWallet,
   insertAudioToWallet,
-  insertAiImageToWallet,
+  saveAiImageToWallet,
   insertVideosOrImagesToWallet,
   getMyWalletData,
   deleteWalletData,

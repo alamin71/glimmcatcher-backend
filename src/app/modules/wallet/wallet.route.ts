@@ -25,9 +25,13 @@ router.post(
   '/create-ai-images',
   auth(USER_ROLE.user),
   checkSubscriptionValidity,
-  walletController.insertAiImageToWallet,
+  walletController.generateAiImage,
 );
-
+router.post(
+  '/save-ai-images',
+  auth(USER_ROLE.user),
+  walletController.saveAiImageToWallet,
+);
 router.post(
   '/insert-videos-or-images',
   auth(USER_ROLE.user),
