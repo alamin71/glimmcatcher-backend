@@ -30,56 +30,6 @@ const updatePhoneNumber = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const updateProfile = catchAsync(async (req: Request, res: Response) => {
-//   let image;
-
-//   // Upload image if provided
-//   if (req.file) {
-//     image = await uploadToS3(req.file, 'profile/');
-//   }
-
-//   // Determine which user's profile is being updated
-//   const isAdmin = req.user.role === 'admin' || req.user.role === 'sup_admin';
-//   const userIdToUpdate = isAdmin && req.params.id ? req.params.id : req.user.id;
-
-//   // If admin is updating their own profile, make gender optional
-//   const isAdminUpdatingSelf = isAdmin && userIdToUpdate === req.user.id;
-
-//   // Build update data
-//   const updateData: Record<string, any> = {
-//     ...req.body,
-//     ...(image && { image }),
-//   };
-
-//   // Remove gender if admin is updating their own profile and gender is missing
-//   if (isAdminUpdatingSelf && !req.body.gender) {
-//     delete updateData.gender;
-//   }
-
-//   // Call the service to update
-//   const result = await userServices.updateProfile(userIdToUpdate, updateData);
-//   // Send notification to user
-//   sendUserNotification(io, userIdToUpdate, {
-//     title: 'Profile Updated',
-//     message: 'Your profile has been updated successfully.',
-//     type: 'profile',
-//   });
-//   // Respond with updated user info and context
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Profile updated successfully',
-//     data: {
-//       updatedUser: result,
-//       updatedBy: {
-//         id: req.user.id,
-//         role: req.user.role,
-//         actingOn: userIdToUpdate,
-//       },
-//     },
-//   });
-// });
-
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   let image;
 

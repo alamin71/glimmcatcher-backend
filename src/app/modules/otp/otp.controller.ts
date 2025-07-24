@@ -18,26 +18,102 @@ const signupInitiate = catchAsync(async (req: Request, res: Response) => {
 });
 
 // 2. Signup OTP verify & create user
+// const signupVerifyOtp = catchAsync(async (req: Request, res: Response) => {
+//   const token = req.headers.token as string;
+//   if (!token) {
+//     throw new Error('Token required in headers');
+//   }
+//   const { otp } = req.body;
+//   const result = await otpServices.verifySignupOtp(token, otp);
+//   // Send welcome notification to user
+//   sendUserNotification(io, result.user._id.toString(), {
+//     title: 'Welcome to Glimmcatcher',
+//     message: 'Your account has been created!',
+//     type: 'welcome',
+//   });
+
+//   // Notify admins
+//   sendAdminNotification(io, {
+//     title: 'New User Registered',
+//     message: `User ${result.user.email} has registered.`,
+//     type: 'user',
+//   });
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'OTP verified successfully. User created.',
+//     data: result,
+//   });
+// });
+
 const signupVerifyOtp = catchAsync(async (req: Request, res: Response) => {
   const token = req.headers.token as string;
   if (!token) {
     throw new Error('Token required in headers');
   }
+
   const { otp } = req.body;
   const result = await otpServices.verifySignupOtp(token, otp);
-  // Send welcome notification to user
-  sendUserNotification(io, result.user._id.toString(), {
-    title: 'Welcome to Glimmcatcher',
-    message: 'Your account has been created!',
-    type: 'welcome',
-  });
+  const targetUserId = result.user._id.toString();
+
+  // 🔍 DEBUG: Check socket rooms before sending notification
+  console.log('🔍 DEBUG - Socket Rooms:');
+  console.log('  - All rooms:', Array.from(io.sockets.adapter.rooms.keys()));
+  console.log(
+    '  - Room for targetUserId exists:',
+    io.sockets.adapter.rooms.has(targetUserId),
+  );
+  console.log(
+    '  - Room for targetUserId (data):',
+    io.sockets.adapter.rooms.get(targetUserId),
+  );
+
+  try {
+    const notificationData = {
+      title: 'Welcome to Glimmcatcher',
+      message: 'Your account has been created!',
+      type: 'welcome',
+      userId: targetUserId,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log('📤 Sending notification:', notificationData);
+    console.log('📤 To room:', targetUserId);
+
+    const room = io.sockets.adapter.rooms.get(targetUserId);
+    if (!room || room.size === 0) {
+      console.log('❌ Room not found or empty for userId:', targetUserId);
+    } else {
+      console.log(
+        '✅ Room found with',
+        room.size,
+        'socket(s):',
+        Array.from(room),
+      );
+    }
+
+    // Emit to the user
+    sendUserNotification(io, targetUserId, notificationData);
+  } catch (err) {
+    console.error('❌ Error sending user notification:', err);
+  }
 
   // Notify admins
-  sendAdminNotification(io, {
-    title: 'New User Registered',
-    message: `User ${result.user.email} has registered.`,
-    type: 'user',
-  });
+  try {
+    const adminNotification = {
+      title: 'New User Registered',
+      message: `User ${result.user.email} has registered.`,
+      type: 'user',
+      userId: targetUserId,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log('📤 Sending admin notification:', adminNotification);
+    sendAdminNotification(io, adminNotification);
+  } catch (err) {
+    console.error('❌ Error sending admin notification:', err);
+  }
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

@@ -55,48 +55,6 @@ const insertAudioToWallet = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const insertAiImageToWallet = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const { prompt } = req.body;
-//     const { userId } = req.user;
-
-//     if (!prompt) {
-//       return sendResponse(res, {
-//         statusCode: 400,
-//         success: false,
-//         message: 'Prompt is required',
-//         data: null,
-//       });
-//     }
-
-//     const openaiImageUrl = await generateAIImage(prompt);
-
-//     const s3Image = await uploadFromUrlToS3(openaiImageUrl, 'wallet/aiImage/');
-
-//     const result = await walletService.insertAiImageToWallet({
-//       user: userId,
-//       type: 'ai_generate',
-//       prompt,
-//       aiGenerate: {
-//         id: s3Image.id,
-//         url: s3Image.url,
-//       },
-//     });
-
-//     sendResponse(res, {
-//       statusCode: 200,
-//       success: true,
-//       message: 'AI image generated and saved successfully',
-//       data: {
-//         prompt,
-//         openaiImageUrl,
-//         s3ImageUrl: s3Image.url,
-//         saved: result,
-//       },
-//     });
-//   },
-// );
-
 const generateAiImage = catchAsync(async (req: Request, res: Response) => {
   const { prompt } = req.body;
 
