@@ -7,7 +7,7 @@ import { io } from '../../../server';
 import { sendUserNotification } from '../../../socketIo';
 import AppError from '../../error/AppError';
 import httpStatus from 'http-status';
-
+import { saveNotification } from '../../utils/saveNotification';
 // Get current user's profile
 const getme = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.getme(req.user.id);
@@ -66,77 +66,39 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   // Call the service to update
   const result = await userServices.updateProfile(userIdToUpdate, updateData);
 
-  // 🔍 DEBUG: Check socket rooms before sending notification
+  // ===== SOCKET.IO ROOM & SOCKET DEBUG LOGS =====
   console.log('🔍 DEBUG - Socket Rooms:');
   console.log('  - All rooms:', Array.from(io.sockets.adapter.rooms.keys()));
+
+  const roomExists = io.sockets.adapter.rooms.has(userIdToUpdate.toString());
   console.log(
-    '  - Room for userIdToUpdate exists:',
-    io.sockets.adapter.rooms.has(userIdToUpdate.toString()),
-  );
-  console.log(
-    '  - Room for userIdToUpdate (string):',
-    io.sockets.adapter.rooms.get(userIdToUpdate.toString()),
+    `  - Room for userIdToUpdate (${userIdToUpdate}) exists:`,
+    roomExists,
   );
 
-  // Convert userIdToUpdate to string (just in case)
-  const targetUserId = userIdToUpdate.toString();
+  if (roomExists) {
+    const roomSockets = io.sockets.adapter.rooms.get(userIdToUpdate.toString());
+    console.log(
+      `  - Room ${userIdToUpdate} sockets count:`,
+      roomSockets?.size,
+      'Socket IDs:',
+      roomSockets ? Array.from(roomSockets) : [],
+    );
+  } else {
+    console.log(`❌ Room not found for userId: ${userIdToUpdate}`);
+  }
 
-  console.log('🔍 DEBUG - Before sending notification:');
-  console.log('  - targetUserId:', targetUserId, typeof targetUserId);
-  console.log('  - Room exists:', io.sockets.adapter.rooms.has(targetUserId));
-
-  // Send notification to user with enhanced debugging
+  // ===== SAVE NOTIFICATION + EMIT REALTIME =====
   try {
-    const notificationData = {
+    await saveNotification({
+      userId: userIdToUpdate.toString(),
       title: 'Profile Updated',
       message: 'Your profile has been updated successfully.',
       type: 'profile',
-      userId: targetUserId, // Include userId in notification for debugging
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log('📤 Sending notification:', notificationData);
-    console.log('📤 To room:', targetUserId);
-
-    // Check if room exists and has sockets
-    const room = io.sockets.adapter.rooms.get(targetUserId);
-    if (!room || room.size === 0) {
-      console.log('❌ Room not found or empty for userId:', targetUserId);
-
-      // Try to find user in other rooms
-      console.log('🔍 Searching for user in all rooms:');
-      for (const [roomId, roomSockets] of io.sockets.adapter.rooms) {
-        if (roomSockets.has(targetUserId) || roomId.includes(targetUserId)) {
-          console.log(
-            '  - Found user in room:',
-            roomId,
-            'with sockets:',
-            Array.from(roomSockets),
-          );
-        }
-      }
-    } else {
-      console.log(
-        '✅ Room found with',
-        room.size,
-        'socket(s):',
-        Array.from(room),
-      );
-    }
-
-    // Send the notification
-    sendUserNotification(io, targetUserId, notificationData);
-
-    // Also try sending to req.user.id as backup (if different)
-    if (req.user.id.toString() !== targetUserId) {
-      console.log('📤 Also sending to req.user.id as backup:', req.user.id);
-      sendUserNotification(io, req.user.id.toString(), {
-        ...notificationData,
-        message: 'Profile update completed successfully.',
-      });
-    }
+    });
+    console.log(`📤 Notification saved & emitted to room: ${userIdToUpdate}`);
   } catch (error) {
-    console.error('❌ Error sending notification:', error);
+    console.error('❌ Error saving/emitting notification:', error);
   }
 
   // Respond with updated user info and context
