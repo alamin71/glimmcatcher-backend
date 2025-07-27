@@ -1,6 +1,6 @@
 import { Notification } from '../modules/notification/notification.model';
-import { sendUserNotification } from '../../socketIo'; // ✅ Import helper
-import { io } from '../../server'; // ✅ Import socket instance
+import { sendUserNotification } from '../../socketIo';
+import { io } from '../../server';
 import mongoose from 'mongoose';
 
 interface SaveNotificationProps {
@@ -19,9 +19,17 @@ export const saveNotification = async ({
   type = 'custom',
 }: SaveNotificationProps) => {
   try {
-    // 🟩 Save to database
+    // 🛑 Validate MongoDB ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.error('❌ Invalid userId:', userId);
+      return;
+    }
+
+    const objectUserId = new mongoose.Types.ObjectId(userId);
+
+    // ✅ Save to DB
     const notification = await Notification.create({
-      userId: new mongoose.Types.ObjectId(userId),
+      userId: objectUserId,
       userType,
       title,
       message,
@@ -32,7 +40,7 @@ export const saveNotification = async ({
 
     console.log('✅ Notification saved to DB:', notification);
 
-    // 🟨 Send real-time notification to that user via socket.io
+    // 📢 Real-time Socket Notification
     sendUserNotification(io, userId, {
       _id: notification._id,
       userId,
