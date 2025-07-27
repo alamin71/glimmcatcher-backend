@@ -7,6 +7,7 @@ import { adminRoutes } from '../modules/Dashboard/admin/admin.route';
 import { ruleRoutes } from '../modules/Dashboard/Rules/rule.route';
 import { SubscriptionRoutes } from '../modules/Dashboard/Subscription/subscription.routes';
 import { PaymentRoutes } from '../modules/Payments/payment.route';
+import NotificationRoutes from '../modules/notification/notification.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -45,7 +46,7 @@ const moduleRoutes = [
   },
   {
     path: '/notifications',
-    route: walletRoutes,
+    route: NotificationRoutes,
   },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
