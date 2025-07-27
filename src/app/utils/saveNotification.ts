@@ -1,6 +1,7 @@
 import { Notification } from '../modules/notification/notification.model';
 import { sendUserNotification } from '../../socketIo'; // ✅ Import helper
 import { io } from '../../server'; // ✅ Import socket instance
+import mongoose from 'mongoose';
 
 interface SaveNotificationProps {
   userId: string;
@@ -20,7 +21,7 @@ export const saveNotification = async ({
   try {
     // 🟩 Save to database
     const notification = await Notification.create({
-      userId,
+      userId: new mongoose.Types.ObjectId(userId),
       userType,
       title,
       message,
