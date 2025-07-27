@@ -9,63 +9,18 @@ import { PaymentService } from './payment.service';
 import { sendEmail } from '../../utils/mailSender';
 import { TUser } from '../user/user.interface';
 import { v4 as uuidv4 } from 'uuid';
+import mongoose, { Types } from 'mongoose';
 import { io } from '../../../server';
-import { sendUserNotification, sendAdminNotification } from '../../../socketIo';
+import { saveNotification } from '../../utils/saveNotification';
+// import { sendUserNotification, sendAdminNotification } from '../../../socketIo';
 import { Subscription } from '../Dashboard/Subscription/subscription.model';
 import User from '../user/user.model';
+import { Admin } from '../Dashboard/admin/admin.model';
 
 // Helper to generate invoiceId if none from Stripe
 const generateInvoiceId = (): string => {
   return `INV-${uuidv4()}`;
 };
-
-// const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
-//   let { amount } = req.body;
-
-//   if (amount === undefined || isNaN(Number(amount))) {
-//     return res.status(StatusCodes.BAD_REQUEST).json({
-//       success: false,
-//       message: 'Amount is required and must be a valid number',
-//     });
-//   }
-
-//   amount = Number(amount);
-
-//   try {
-//     const paymentIntent = await stripe.paymentIntents.create({
-//       amount: Math.round(amount * 100),
-//       currency: 'usd',
-//       payment_method_types: ['card'],
-//     });
-
-//     sendResponse(res, {
-//       statusCode: StatusCodes.OK,
-//       success: true,
-//       message: 'Payment intent created',
-//       data: {
-//         clientSecret: paymentIntent.client_secret,
-//       },
-//     });
-//   } catch (error) {
-//     sendUserNotification(io, req.user?.id, {
-//       title: 'Payment Failed',
-//       message: 'Your payment could not be processed. Please try again.',
-//       type: 'payment',
-//     });
-
-//     sendAdminNotification(io, {
-//       title: 'Payment Failed',
-//       message: `User ${req.user?.id} attempted a payment but it failed.`,
-//       type: 'payment',
-//     });
-
-//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-//       success: false,
-//       message: 'Failed to create payment intent',
-//       error: error instanceof Error ? error.message : error,
-//     });
-//   }
-// });
 
 const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
   let { amount } = req.body;
@@ -96,26 +51,24 @@ const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    const userNotification = {
+    await saveNotification({
+      userId,
+      userType: 'User',
       title: 'Payment Failed',
       message: 'Your payment could not be processed. Please try again.',
       type: 'payment',
-    };
-    const adminNotification = {
-      title: 'Payment Failed',
-      message: `User ${userId} attempted a payment but it failed.`,
-      type: 'payment',
-    };
-
-    sendUserNotification(io, userId, userNotification);
-    sendAdminNotification(io, adminNotification);
-
-    console.log('🔴 Payment intent failed', {
-      userId,
-      error: error instanceof Error ? error.message : error,
-      userNotification,
-      adminNotification,
     });
+
+    const allAdmins = await Admin.find();
+    for (const admin of allAdmins) {
+      await saveNotification({
+        userId: (admin._id as Types.ObjectId).toString(),
+        userType: 'Admin',
+        title: 'Payment Failed',
+        message: `User ${userId} attempted a payment but it failed.`,
+        type: 'payment',
+      });
+    }
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -125,102 +78,6 @@ const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
-// const savePayment = catchAsync(async (req: Request, res: Response) => {
-//   const {
-//     subscriptionId,
-//     amount,
-//     transactionId,
-//     invoiceId: clientInvoiceId,
-//     status,
-//   } = req.body;
-//   const userId = req.user?.id;
-
-//   if (!transactionId) {
-//     throw new AppError(StatusCodes.BAD_REQUEST, 'Transaction ID is required');
-//   }
-
-//   // Retrieve PaymentIntent from Stripe
-//   const paymentIntent = await stripe.paymentIntents.retrieve(transactionId);
-
-//   // Get Stripe invoice ID if exists
-//   const stripeInvoiceId = paymentIntent.invoice || null;
-
-//   // Decide final invoice ID
-//   const finalInvoiceId =
-//     clientInvoiceId || stripeInvoiceId || generateInvoiceId();
-//   //subscription plan details
-//   const subscription = await Subscription.findById(subscriptionId);
-//   if (!subscription) {
-//     throw new AppError(StatusCodes.NOT_FOUND, 'Subscription plan not found');
-//   }
-
-//   const now = new Date();
-//   let validTill = new Date(now);
-//   if (subscription.billingCycle === 'monthly') {
-//     validTill.setMonth(validTill.getMonth() + 1);
-//   } else if (subscription.billingCycle === 'yearly') {
-//     validTill.setFullYear(validTill.getFullYear() + 1);
-//   }
-
-//   const result = await PaymentService.savePaymentDetails({
-//     user: userId,
-//     subscriptionId,
-//     amount,
-//     transactionId,
-//     invoiceId: finalInvoiceId,
-//     status,
-//     paymentDate: new Date(),
-//   });
-
-//   if (!result) {
-//     throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to save payment!');
-//   }
-//   await User.findByIdAndUpdate(userId, {
-//     subscription: {
-//       plan: subscription._id,
-//       startsAt: now,
-//       expiresAt: validTill,
-//       status: 'active',
-//     },
-//   });
-//   sendUserNotification(io, userId, {
-//     title: 'Payment Successful',
-//     message: `Your payment of $${amount} was successful!`,
-//     type: 'payment',
-//   });
-
-//   sendAdminNotification(io, {
-//     title: 'New Payment Received',
-//     message: `User ${userId} made a payment of $${amount}.`,
-//     type: 'payment',
-//   });
-
-//   const userEmail = (result.user as TUser).email;
-
-//   if (userEmail) {
-//     await sendEmail(
-//       userEmail,
-//       'Payment Successful',
-//       `
-//       <h2>Payment Confirmation</h2>
-//       <p>Thank you for your payment of <strong>$${amount}</strong>.</p>
-//       <p>Transaction ID: ${transactionId}</p>
-//       <p>Invoice ID: ${finalInvoiceId}</p>
-//       <p>Status: ${status}</p>
-//       <p>Thank you for your subscription!</p>
-//       `,
-//     );
-//   }
-
-//   sendResponse(res, {
-//     statusCode: StatusCodes.OK,
-//     success: true,
-//     message: 'Payment details saved successfully',
-//     data: result,
-//   });
-// });
-
-// --- webhook handler ---
 const savePayment = catchAsync(async (req: Request, res: Response) => {
   const {
     subscriptionId,
@@ -276,27 +133,24 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-  const userNotification = {
+  await saveNotification({
+    userId,
+    userType: 'User',
     title: 'Payment Successful',
     message: `Your payment of $${amount} was successful!`,
     type: 'payment',
-  };
-  const adminNotification = {
-    title: 'New Payment',
-    message: `User ${userId} made a payment of $${amount}.`,
-    type: 'payment',
-  };
-
-  sendUserNotification(io, userId, userNotification);
-  sendAdminNotification(io, adminNotification);
-
-  console.log('✅ Payment saved & notifications sent', {
-    userId,
-    amount,
-    transactionId,
-    userNotification,
-    adminNotification,
   });
+
+  const allAdmins = await Admin.find();
+  for (const admin of allAdmins) {
+    await saveNotification({
+      userId: (admin._id as Types.ObjectId).toString(),
+      userType: 'Admin',
+      title: 'New Payment',
+      message: `User ${userId} made a payment of $${amount}.`,
+      type: 'payment',
+    });
+  }
 
   const userEmail = (result.user as TUser).email;
   if (userEmail) {
@@ -312,7 +166,6 @@ const savePayment = catchAsync(async (req: Request, res: Response) => {
       <p>Thank you for your subscription!</p>
       `,
     );
-    console.log('📧 Payment confirmation email sent to', userEmail);
   }
 
   sendResponse(res, {
@@ -336,14 +189,12 @@ const stripeWebhook = async (req: Request, res: Response) => {
   let event;
 
   try {
-    // IMPORTANT: rawBody must be available on req (express.raw middleware in route)
     event = stripe.webhooks.constructEvent(
       (req as any).rawBody,
       sig,
       webhookSecret,
     );
   } catch (err: any) {
-    console.error('⚠️ Webhook signature verification failed.', err.message);
     return res
       .status(StatusCodes.BAD_REQUEST)
       .send(`Webhook Error: ${err.message}`);
@@ -352,10 +203,31 @@ const stripeWebhook = async (req: Request, res: Response) => {
   switch (event.type) {
     case 'payment_intent.succeeded': {
       const paymentIntent = event.data.object;
-      // Update payment status in DB
       await PaymentService.updatePaymentStatus(paymentIntent.id, 'succeeded');
 
-      // Optional: send notification or email if needed
+      const payment = await PaymentService.findByTransactionId(
+        paymentIntent.id,
+      );
+      if (payment) {
+        await saveNotification({
+          userId: payment.user.toString(),
+          userType: 'User',
+          title: 'Payment Successful',
+          message: `Your payment of $${payment.amount} was successful!`,
+          type: 'payment',
+        });
+
+        const allAdmins = await Admin.find();
+        for (const admin of allAdmins) {
+          await saveNotification({
+            userId: (admin._id as Types.ObjectId).toString(),
+            userType: 'Admin',
+            title: 'New Payment',
+            message: `User ${payment.user} made a payment of $${payment.amount}.`,
+            type: 'payment',
+          });
+        }
+      }
       break;
     }
     case 'payment_intent.payment_failed': {
@@ -363,7 +235,6 @@ const stripeWebhook = async (req: Request, res: Response) => {
       await PaymentService.updatePaymentStatus(paymentIntent.id, 'failed');
       break;
     }
-    // You can handle more Stripe events here if needed
     default:
       console.log(`Unhandled event type: ${event.type}`);
   }

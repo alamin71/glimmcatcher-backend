@@ -9,6 +9,12 @@ const savePaymentDetails = async (payload: IPayment) => {
     .populate('user')
     .populate('subscriptionId');
 };
+const findByTransactionId = async (transactionId: string) => {
+  return await Payment.findOne({ transactionId })
+    .populate('user')
+    .populate('subscriptionId');
+};
+
 const getSinglePayment = async (id: string) => {
   return await Payment.findById(id).populate('user').populate('subscriptionId');
 };
@@ -211,6 +217,7 @@ const updatePaymentStatus = async (transactionId: string, status: string) => {
 export const PaymentService = {
   savePaymentDetails,
   getSinglePayment,
+  findByTransactionId,
   getAllPayments,
   getTotalEarnings,
   getTodaysEarnings,
