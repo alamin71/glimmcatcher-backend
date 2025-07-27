@@ -6,7 +6,7 @@ import { USER_ROLE } from '../user/user.constant';
 const router = express.Router();
 
 router.get(
-  '/notifications',
+  '/',
   getNotifications,
   auth(USER_ROLE.user, USER_ROLE.admin, USER_ROLE.sup_admin),
 );
