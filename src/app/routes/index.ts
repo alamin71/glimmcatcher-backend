@@ -43,6 +43,10 @@ const moduleRoutes = [
     path: '/wallet',
     route: walletRoutes,
   },
+  {
+    path: '/notifications',
+    route: walletRoutes,
+  },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
