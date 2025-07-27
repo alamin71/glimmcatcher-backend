@@ -4,6 +4,7 @@ import { io } from '../../server'; // ✅ Import socket instance
 
 interface SaveNotificationProps {
   userId: string;
+  userType: 'User' | 'Admin';
   title: string;
   message: string;
   type?: 'welcome' | 'profile' | 'payment' | 'admin' | 'custom';
@@ -11,6 +12,7 @@ interface SaveNotificationProps {
 
 export const saveNotification = async ({
   userId,
+  userType,
   title,
   message,
   type = 'custom',
@@ -19,6 +21,7 @@ export const saveNotification = async ({
     // 🟩 Save to database
     const notification = await Notification.create({
       userId,
+      userType,
       title,
       message,
       type,

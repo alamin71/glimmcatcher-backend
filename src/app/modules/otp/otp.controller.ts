@@ -153,6 +153,7 @@ const signupVerifyOtp = catchAsync(async (req: Request, res: Response) => {
 
     await saveNotification({
       userId: targetUserId,
+      userType: 'User',
       title,
       message,
       type,
@@ -178,6 +179,7 @@ const signupVerifyOtp = catchAsync(async (req: Request, res: Response) => {
 
     await saveNotification({
       userId: adminUserId,
+      userType: 'Admin',
       title: adminTitle,
       message: adminMessage,
       type: adminType,

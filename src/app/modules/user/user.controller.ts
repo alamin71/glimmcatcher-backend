@@ -93,6 +93,8 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
     await saveNotification({
       userId: userIdToUpdate.toString(),
       title: 'Profile Updated',
+      userType: 'User',
+
       message: 'Your profile has been updated successfully.',
       type: 'profile',
     });
