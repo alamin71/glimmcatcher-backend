@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.get(
   '/',
-  getNotifications,
   auth(USER_ROLE.user, USER_ROLE.admin, USER_ROLE.sup_admin),
+  getNotifications,
 );
 
 export default router;
