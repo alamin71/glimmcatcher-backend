@@ -7,6 +7,7 @@ import { adminRoutes } from '../modules/Dashboard/admin/admin.route';
 import { ruleRoutes } from '../modules/Dashboard/Rules/rule.route';
 import { SubscriptionRoutes } from '../modules/Dashboard/Subscription/subscription.routes';
 import { PaymentRoutes } from '../modules/Payments/payment.route';
+import { onboardingRoutes } from '../modules/onboarding/onboarding.route';
 import NotificationRoutes from '../modules/notification/notification.route';
 
 const router = Router();
@@ -47,6 +48,10 @@ const moduleRoutes = [
   {
     path: '/notifications',
     route: NotificationRoutes,
+  },
+  {
+    path: 'onboarding',
+    route: onboardingRoutes,
   },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
