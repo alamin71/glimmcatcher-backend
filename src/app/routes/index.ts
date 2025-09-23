@@ -50,7 +50,7 @@ const moduleRoutes = [
     route: NotificationRoutes,
   },
   {
-    path: 'onboarding',
+    path: '/onboarding',
     route: onboardingRoutes,
   },
 ];
