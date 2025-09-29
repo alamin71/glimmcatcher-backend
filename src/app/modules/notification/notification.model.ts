@@ -5,12 +5,12 @@ const notificationSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      refPath: 'userType', // Dynamically reference model
+      refPath: 'userType', 
     },
     userType: {
       type: String,
       required: true,
-      enum: ['User', 'Admin'], // Must match actual model names
+      enum: ['User', 'Admin'], 
     },
     title: {
       type: String,

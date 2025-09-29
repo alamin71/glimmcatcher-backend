@@ -140,11 +140,11 @@ const insertVideosOrImagesToWallet = catchAsync(
       }
     }
 
-    const { userId } = req.user; // Get user ID from auth middleware
+    const { userId } = req.user; 
 
     const payload: any = {
       user: userId,
-      type: 'image_video', //REQUIRED, matches Mongoose schema
+      type: 'image_video', 
       imageVideo: {
         title: req.body.title,
         description: req.body.description,
@@ -178,15 +178,7 @@ const getMyWalletData = catchAsync(async (req: Request, res: Response) => {
     meta: result?.meta,
   });
 });
-// const deleteWalletData = catchAsync(async (req: Request, res: Response) => {
-//   const result = await walletService.deleteWalletData(req.params.id);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Wallet data deleted successfully',
-//     data: result,
-//   });
-// });
+
 const deleteWalletData = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
   const result = await walletService.deleteWalletData(req.params.id, userId);

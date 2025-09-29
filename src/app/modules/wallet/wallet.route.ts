@@ -32,11 +32,7 @@ router.post(
   auth(USER_ROLE.user),
   walletController.saveAiImageToWallet,
 );
-// router.post(
-//   '/insert-videos-or-images',
-//   auth(USER_ROLE.user),
-//   walletController.insertVideosOrImagesToWallet,
-// );
+
 router.post(
   '/insert-videos-or-images',
   auth(USER_ROLE.user),

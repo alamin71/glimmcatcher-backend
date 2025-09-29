@@ -2,7 +2,7 @@
 import { Schema, model } from 'mongoose';
 
 interface IOnboarding {
-  images: { id: string; url: string }[]; // S3 URL save হবে
+  images: { id: string; url: string }[]; // S3 URL save 
 }
 
 const onboardingSchema = new Schema<IOnboarding>(
