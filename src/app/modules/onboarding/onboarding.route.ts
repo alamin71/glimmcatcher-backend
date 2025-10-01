@@ -16,7 +16,7 @@ router.post(
 );
 
 // Admin update latest
-router.put(
+router.post(
   '/update',
   auth(USER_ROLE.admin, USER_ROLE.sup_admin),
   upload.array('files', 3), // max 3 images
