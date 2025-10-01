@@ -106,32 +106,79 @@ const uploadOnboardingImages = catchAsync(async (req: Request, res: Response) =>
 });
 
 // update latest set of images
+// const updateOnboardingImages = catchAsync(async (req: Request, res: Response) => {
+//   const files = req.files as Express.Multer.File[];
+//   const { titles, descriptions } = req.body;
+
+//   const uploadedImages = [];
+
+//   for (let i = 0; i < files.length; i++) {
+//     const file = files[i];
+//     const image = await uploadToS3(file, 'onboarding/');
+
+//     uploadedImages.push({
+//       id: image.id,
+//       url: image.url,
+//       title: Array.isArray(titles) ? titles[i] : titles,
+//       description: Array.isArray(descriptions) ? descriptions[i] : descriptions,
+//     });
+//   }
+
+//   let latest = await Onboarding.findOne().sort({ createdAt: -1 });
+
+//   if (!latest) {
+//     latest = await Onboarding.create({ images: uploadedImages });
+//   } else {
+//     latest.images = uploadedImages;
+//     await latest.save();
+//   }
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Onboarding images updated successfully',
+//     data: latest,
+//   });
+// });
+// Update 1, 2, or 3 images partially
 const updateOnboardingImages = catchAsync(async (req: Request, res: Response) => {
+  const latest = await Onboarding.findOne().sort({ createdAt: -1 });
+  if (!latest) throw new Error('No onboarding data found');
+
   const files = req.files as Express.Multer.File[];
-  const { titles, descriptions } = req.body;
+  const updates = JSON.parse(req.body.updates); 
+  // Example updates: 
+  // [{ id: 'img1', title: 'New title', description: 'New desc', filename: 'image1.png' }]
 
-  const uploadedImages = [];
+  const updatedImages = await Promise.all(
+    latest.images.map(async (img) => {
+      const update = updates.find((u: any) => u.id === img.id);
+      if (update) {
+        let newFileData = { id: img.id, url: img.url };
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const image = await uploadToS3(file, 'onboarding/');
+        // Replace file if uploaded
+        if (update.filename) {
+          const file = files.find(f => f.originalname === update.filename);
+          if (file) {
+            newFileData = await uploadToS3(file, 'onboarding/');
+          }
+        }
 
-    uploadedImages.push({
-      id: image.id,
-      url: image.url,
-      title: Array.isArray(titles) ? titles[i] : titles,
-      description: Array.isArray(descriptions) ? descriptions[i] : descriptions,
-    });
-  }
+        return {
+          id: newFileData.id,
+          url: newFileData.url,
+          title: update.title || img.title,
+          description: update.description || img.description,
+        };
+      }
 
-  let latest = await Onboarding.findOne().sort({ createdAt: -1 });
+      // No update for this image
+      return img;
+    })
+  );
 
-  if (!latest) {
-    latest = await Onboarding.create({ images: uploadedImages });
-  } else {
-    latest.images = uploadedImages;
-    await latest.save();
-  }
+  latest.images = updatedImages;
+  await latest.save();
 
   sendResponse(res, {
     statusCode: 200,
@@ -140,7 +187,6 @@ const updateOnboardingImages = catchAsync(async (req: Request, res: Response) =>
     data: latest,
   });
 });
-
 // Always return the latest
 const getOnboardingImages = catchAsync(async (req: Request, res: Response) => {
   const result = await Onboarding.findOne().sort({ createdAt: -1 }); 
