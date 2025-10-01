@@ -77,32 +77,52 @@ import { uploadToS3 } from '../../utils/fileHelper';
 import { Onboarding } from './onboarding.model';
 
 // POST (create new set of images with title, description)
+// const uploadOnboardingImages = catchAsync(async (req: Request, res: Response) => {
+//   const files = req.files as Express.Multer.File[];
+//   const { titles, descriptions } = req.body; // expecting array
+
+//   const uploadedImages = [];
+
+//   for (let i = 0; i < files.length; i++) {
+//     const file = files[i];
+//     const image = await uploadToS3(file, 'onboarding/');
+
+//     uploadedImages.push({
+//       id: image.id,
+//       url: image.url,
+//       title: Array.isArray(titles) ? titles[i] : titles,
+//       description: Array.isArray(descriptions) ? descriptions[i] : descriptions,
+//     });
+//   }
+
+//   const result = await Onboarding.create({ images: uploadedImages });
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Onboarding images uploaded successfully',
+//     data: result,
+//   });
+// });
 const uploadOnboardingImages = catchAsync(async (req: Request, res: Response) => {
   const files = req.files as Express.Multer.File[];
-  const { titles, descriptions } = req.body; // expecting array
+  const { titles, descriptions } = req.body;
 
   const uploadedImages = [];
-
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const image = await uploadToS3(file, 'onboarding/');
-
     uploadedImages.push({
       id: image.id,
       url: image.url,
+      key: `img${i + 1}`, // assign logical id
       title: Array.isArray(titles) ? titles[i] : titles,
       description: Array.isArray(descriptions) ? descriptions[i] : descriptions,
     });
   }
 
   const result = await Onboarding.create({ images: uploadedImages });
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Onboarding images uploaded successfully',
-    data: result,
-  });
+  sendResponse(res, { statusCode: 200, success: true, message: 'Onboarding images uploaded successfully', data: result });
 });
 
 // update latest set of images
@@ -141,39 +161,43 @@ const uploadOnboardingImages = catchAsync(async (req: Request, res: Response) =>
 //   });
 // });
 // Update 1, 2, or 3 images partially
-const updateOnboardingImages = catchAsync(async (req: Request, res: Response) => {
+interface IUpdateImage {
+  key: string;          // logical id: img1, img2, etc
+  title?: string;
+  description?: string;
+  filename?: string;    // uploaded file name
+}
+
+export const updateOnboardingImages = catchAsync(async (req: Request, res: Response) => {
   const latest = await Onboarding.findOne().sort({ createdAt: -1 });
   if (!latest) throw new Error('No onboarding data found');
 
   const files = req.files as Express.Multer.File[];
-  const updates = JSON.parse(req.body.updates); 
-  // Example updates: 
-  // [{ id: 'img1', title: 'New title', description: 'New desc', filename: 'image1.png' }]
+  const updates: IUpdateImage[] = JSON.parse(req.body.updates || '[]');
 
   const updatedImages = await Promise.all(
     latest.images.map(async (img) => {
-      const update = updates.find((u: any) => u.id === img.id);
-      if (update) {
-        let newFileData = { id: img.id, url: img.url };
+      const update = updates.find(u => u.key === img.key);
 
-        // Replace file if uploaded
-        if (update.filename) {
-          const file = files.find(f => f.originalname === update.filename);
-          if (file) {
-            newFileData = await uploadToS3(file, 'onboarding/');
-          }
+      if (!update) return img; // no update for this image
+
+      let newFileData = { id: img.id, url: img.url };
+
+      // Replace file if uploaded
+      if (update.filename) {
+        const file = files.find(f => f.originalname === update.filename);
+        if (file) {
+          newFileData = await uploadToS3(file, 'onboarding/');
         }
-
-        return {
-          id: newFileData.id,
-          url: newFileData.url,
-          title: update.title || img.title,
-          description: update.description || img.description,
-        };
       }
 
-      // No update for this image
-      return img;
+      return {
+        id: newFileData.id,
+        url: newFileData.url,
+        key: img.key, // preserve logical key
+        title: update.title ?? img.title,          // TypeScript safe
+        description: update.description ?? img.description,
+      };
     })
   );
 
