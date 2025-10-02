@@ -35,6 +35,50 @@ interface IUpdateImage {
   filename?: string;    // uploaded file name
 }
 
+// export const updateOnboardingImages = catchAsync(async (req: Request, res: Response) => {
+//   const latest = await Onboarding.findOne().sort({ createdAt: -1 });
+//   if (!latest) throw new Error('No onboarding data found');
+
+//   const files = req.files as Express.Multer.File[];
+//   const updates: IUpdateImage[] = JSON.parse(req.body.updates || '[]');
+
+//   const updatedImages = await Promise.all(
+//     latest.images.map(async (img) => {
+//       const update = updates.find(u => u.key === img.key);
+
+//       if (!update) return img; // no update for this image
+
+//       let newFileData = { id: img.id, url: img.url };
+
+//       // Replace file if uploaded
+//       if (update.filename) {
+//         const file = files.find(f => f.originalname === update.filename);
+//         if (file) {
+//           newFileData = await uploadToS3(file, 'onboarding/');
+//         }
+//       }
+
+//       return {
+//         id: newFileData.id,
+//         url: newFileData.url,
+//         key: img.key, // preserve logical key
+//         title: update.title ?? img.title,          // TypeScript safe
+//         description: update.description ?? img.description,
+//       };
+//     })
+//   );
+
+//   latest.images = updatedImages;
+//   await latest.save();
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Onboarding images updated successfully',
+//     data: latest,
+//   });
+// });
+// Always return the latest
 export const updateOnboardingImages = catchAsync(async (req: Request, res: Response) => {
   const latest = await Onboarding.findOne().sort({ createdAt: -1 });
   if (!latest) throw new Error('No onboarding data found');
@@ -43,26 +87,24 @@ export const updateOnboardingImages = catchAsync(async (req: Request, res: Respo
   const updates: IUpdateImage[] = JSON.parse(req.body.updates || '[]');
 
   const updatedImages = await Promise.all(
-    latest.images.map(async (img) => {
+    latest.images.map(async (img, index) => {
       const update = updates.find(u => u.key === img.key);
 
-      if (!update) return img; // no update for this image
+      if (!update) return img; // no update
 
       let newFileData = { id: img.id, url: img.url };
 
-      // Replace file if uploaded
-      if (update.filename) {
-        const file = files.find(f => f.originalname === update.filename);
-        if (file) {
-          newFileData = await uploadToS3(file, 'onboarding/');
-        }
+      // Replace file if uploaded: use index based matching
+      const file = files[index];
+      if (file) {
+        newFileData = await uploadToS3(file, 'onboarding/');
       }
 
       return {
         id: newFileData.id,
         url: newFileData.url,
-        key: img.key, // preserve logical key
-        title: update.title ?? img.title,          // TypeScript safe
+        key: img.key,
+        title: update.title ?? img.title,
         description: update.description ?? img.description,
       };
     })
@@ -78,7 +120,7 @@ export const updateOnboardingImages = catchAsync(async (req: Request, res: Respo
     data: latest,
   });
 });
-// Always return the latest
+
 const getOnboardingImages = catchAsync(async (req: Request, res: Response) => {
   const result = await Onboarding.findOne().sort({ createdAt: -1 }); 
   sendResponse(res, {
